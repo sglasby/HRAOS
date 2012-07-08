@@ -109,7 +109,7 @@ public class TileViewPortControl
                         if (sp != null)
                         {
                             // FIXME: do the GL drawing here!!! sp.Draw(surface, pixel_xx, pixel_yy, null);
-                            this.blit_square_tile(view_xx, view_yy, sp.ID, 0);
+                            this.blit_square_tile(view_xx, view_yy, sp.ID - 1, 0);
                         }
                     } // foreach(LL)
                 }
