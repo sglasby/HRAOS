@@ -95,18 +95,18 @@ namespace OpenGLForm
         {
             //MessageBox.Show(ee.KeyCode.ToString(), "Your input");
 
+            bool need_invalidate = true;
+
             // Orthogonal Directions:
             switch (ee.KeyCode) {
                 case Keys.Left:
                 case Keys.NumPad4:
                     subject.angle -= 15.0f;
-                    glControl1.Invalidate();
                     break;
 
                 case Keys.Right:
                 case Keys.NumPad6:
                     subject.angle += 15.0f;
-                    glControl1.Invalidate();
                     break;
 
                 case Keys.Q:
@@ -122,6 +122,15 @@ namespace OpenGLForm
                 case Keys.W:
                     subject.tiling_mode = TilingModes.Hex_WE;
                     break;
+
+                default:
+                    need_invalidate = false;
+                    break;
+            }
+
+            if (need_invalidate)
+            {
+                glControl1.Invalidate();
             }
         } // OnKeyPress()
 
