@@ -36,7 +36,7 @@ namespace OpenGLForm
         int texture;
         int[] tiles;
 
-        TilingModes tiling_mode = TilingModes.Hex_NS;
+        public TilingModes tiling_mode = TilingModes.Square;
         int padding = 1;
         public double angle = 0.0;
 

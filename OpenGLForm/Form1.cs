@@ -96,17 +96,32 @@ namespace OpenGLForm
             //MessageBox.Show(ee.KeyCode.ToString(), "Your input");
 
             // Orthogonal Directions:
-            if (ee.KeyCode == Keys.Left ||
-                ee.KeyCode == Keys.NumPad4)
-            {
-                subject.angle -= 15.0f;
-                glControl1.Invalidate();
-            }
-            if (ee.KeyCode == Keys.Right ||
-                ee.KeyCode == Keys.NumPad6)
-            {
-                subject.angle += 15.0f;
-                glControl1.Invalidate();
+            switch (ee.KeyCode) {
+                case Keys.Left:
+                case Keys.NumPad4:
+                    subject.angle -= 15.0f;
+                    glControl1.Invalidate();
+                    break;
+
+                case Keys.Right:
+                case Keys.NumPad6:
+                    subject.angle += 15.0f;
+                    glControl1.Invalidate();
+                    break;
+
+                case Keys.Q:
+                    subject.tiling_mode = TilingModes.Square;
+                    break;
+
+                case Keys.N:
+                case Keys.S:
+                    subject.tiling_mode = TilingModes.Hex_NS;
+                    break;
+
+                case Keys.E:
+                case Keys.W:
+                    subject.tiling_mode = TilingModes.Hex_WE;
+                    break;
             }
         } // OnKeyPress()
 
