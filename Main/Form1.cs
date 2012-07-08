@@ -13,7 +13,6 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using System.Collections.Generic;
-using OpenGL_Control_experiment;
 
 namespace OpenGLForm
 {
@@ -24,13 +23,33 @@ namespace OpenGLForm
         public string                ts_filename = "U4.B_enhanced-32x32.png";
         public System.Drawing.Bitmap bm_sheet;
         Stopwatch sw = new Stopwatch(); // available to all event handlers
-        Subject subject;
-
+        TileViewPortControl tvp_control;
+        TileViewPort subject;
+        SimpleMapV1 map;
+        TileSheet ts;
+ 
         public Form1()
         {
             InitializeComponent();
-            bm_sheet = new Bitmap(ts_filename);
-            subject = new Subject();
+
+            tvp_control = new TileViewPortControl(glControl1);
+            //tvp_control.BackColor = System.Drawing.SystemColors.ControlDark;
+            //tvp_control.Location = new System.Drawing.Point(0, 0);
+            //tvp_control.Size = new System.Drawing.Size(729, 764);
+
+            string filename = @"U4.B_enhanced-32x32.png";
+            ts = new TileSheet(filename, 16, 16);
+
+            map = new SimpleMapV1(16, 128, ts);
+//            map.AddTerrainRegion(map_16x128, 0, 0);
+
+            subject = new TileViewPort(this.tvp_control,
+                9, 9,
+                //ViewPortScrollingConstraint.EntireMap,
+                ViewPortScrollingConstraint.CenterTile,
+                //ViewPortScrollingConstraint.EdgeCorner, 
+                map, 0, 0);
+            subject.set_center(map, 2, 2);
         }
 
         private int CreateTextureFromBitmap(Bitmap bitmap)
@@ -82,7 +101,7 @@ namespace OpenGLForm
 
             loaded = true;
             GL.ClearColor(Color.SkyBlue); // Yay! .NET Colors can be used directly!
-            subject.LoadTextures();
+            tvp_control.LoadTextures();
 
             Application.Idle += Application_Idle; // press TAB twice after +=
             this.glControl1.KeyUp += new KeyEventHandler(OnKeyPress);
@@ -99,29 +118,6 @@ namespace OpenGLForm
 
             // Orthogonal Directions:
             switch (ee.KeyCode) {
-                case Keys.Left:
-                case Keys.NumPad4:
-                    subject.angle -= 15.0f;
-                    break;
-
-                case Keys.Right:
-                case Keys.NumPad6:
-                    subject.angle += 15.0f;
-                    break;
-
-                case Keys.Q:
-                    subject.tiling_mode = TilingModes.Square;
-                    break;
-
-                case Keys.N:
-                case Keys.S:
-                    subject.tiling_mode = TilingModes.Hex_NS;
-                    break;
-
-                case Keys.E:
-                case Keys.W:
-                    subject.tiling_mode = TilingModes.Hex_WE;
-                    break;
 
                 default:
                     need_invalidate = false;
@@ -197,7 +193,7 @@ namespace OpenGLForm
 
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
-            subject.Render();
+            tvp_control.Render();
            
 
             glControl1.SwapBuffers();
