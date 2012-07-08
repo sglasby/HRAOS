@@ -23,7 +23,7 @@ namespace OpenGLForm
         public string                ts_filename = "U4.B_enhanced-32x32.png";
         public System.Drawing.Bitmap bm_sheet;
         Stopwatch sw = new Stopwatch(); // available to all event handlers
-        TileViewPortControl tvp_control;
+        TileViewPortControl subject_control;
         TileViewPort subject;
         SimpleMapV1 map;
         TileSheet ts;
@@ -32,19 +32,38 @@ namespace OpenGLForm
         {
             InitializeComponent();
 
-            tvp_control = new TileViewPortControl(glControl1);
-            //tvp_control.BackColor = System.Drawing.SystemColors.ControlDark;
-            //tvp_control.Location = new System.Drawing.Point(0, 0);
-            //tvp_control.Size = new System.Drawing.Size(729, 764);
+            subject_control = new TileViewPortControl(glControl1);
+            //subject_control.BackColor = System.Drawing.SystemColors.ControlDark;
+            //subject_control.Location = new System.Drawing.Point(0, 0);
+            //subject_control.Size = new System.Drawing.Size(729, 764);
 
             string filename = @"U4.B_enhanced-32x32.png";
             ts = new TileSheet(filename, 16, 16);
 
-            map = new SimpleMapV1(16, 128, ts);
-//            map.AddTerrainRegion(map_16x128, 0, 0);
+            int[] path_rect_5x4 = new int[]
+            { // 5 = grass, 7 = trees, 58 = boulder
+               58,  5,  5,  7,  5,
+                5,  5,  5,  7,  7,
+                7,  7,  7,  7,  0,
+                5,  5,  7,  5,  5,
+            };
 
-            subject = new TileViewPort(this.tvp_control,
-                9, 9,
+            DenseGrid map_16x128 = new DenseGrid(16, 128, 77);
+            DenseGrid flip_none = new DenseGrid(5, 4, path_rect_5x4);  // Test with width != height
+            DenseGrid flip_we = flip_none.Flip_WE();
+            DenseGrid flip_ns = flip_none.Flip_NS();
+            DenseGrid flip_wens = flip_we.Flip_NS();
+
+            DenseGrid.BlitFromAOntoB(flip_none, map_16x128, 1, 1);
+            DenseGrid.BlitFromAOntoB(flip_we, map_16x128, 7, 1);
+            DenseGrid.BlitFromAOntoB(flip_ns, map_16x128, 1, 7);
+            DenseGrid.BlitFromAOntoB(flip_wens, map_16x128, 7, 7);
+
+            map = new SimpleMapV1(16, 128, ts);
+            map.AddTerrainRegion(map_16x128, 0, 0);
+
+            subject = new TileViewPort(this.subject_control,
+                15, 15,
                 //ViewPortScrollingConstraint.EntireMap,
                 ViewPortScrollingConstraint.CenterTile,
                 //ViewPortScrollingConstraint.EdgeCorner, 
@@ -101,7 +120,7 @@ namespace OpenGLForm
 
             loaded = true;
             GL.ClearColor(Color.SkyBlue); // Yay! .NET Colors can be used directly!
-            tvp_control.LoadTextures();
+            subject_control.LoadTextures();
 
             Application.Idle += Application_Idle; // press TAB twice after +=
             this.glControl1.KeyUp += new KeyEventHandler(OnKeyPress);
@@ -109,24 +128,60 @@ namespace OpenGLForm
             sw.Start(); // start at application boot
         }
 
-
         public void OnKeyPress(object sender, KeyEventArgs ee)
         {
             //MessageBox.Show(ee.KeyCode.ToString(), "Your input");
 
-            bool need_invalidate = true;
-
             // Orthogonal Directions:
-            switch (ee.KeyCode) {
-
-                default:
-                    need_invalidate = false;
-                    break;
+            if (ee.KeyCode == Keys.Down ||
+                ee.KeyCode == Keys.NumPad2)
+            { // South
+                subject.y_origin++;
+                subject.Invalidate();
+            }
+            if (ee.KeyCode == Keys.Up ||
+                ee.KeyCode == Keys.NumPad8)
+            { // North
+                subject.y_origin--;
+                subject.Invalidate();
+            }
+            if (ee.KeyCode == Keys.Left ||
+                ee.KeyCode == Keys.NumPad4)
+            { // West
+                subject.x_origin--;
+                subject.Invalidate();
+            }
+            if (ee.KeyCode == Keys.Right ||
+                ee.KeyCode == Keys.NumPad6)
+            { // East
+                subject.x_origin++;
+                subject.Invalidate();
             }
 
-            if (need_invalidate)
-            {
-                glControl1.Invalidate();
+            // Diagonal Directions:
+            if (ee.KeyCode == Keys.NumPad7)
+            { // NorthWest
+                subject.y_origin--;
+                subject.x_origin--;
+                subject.Invalidate();
+            }
+            if (ee.KeyCode == Keys.NumPad9)
+            { // NorthEast
+                subject.y_origin--;
+                subject.x_origin++;
+                subject.Invalidate();
+            }
+            if (ee.KeyCode == Keys.NumPad1)
+            { // SouthWest
+                subject.y_origin++;
+                subject.x_origin--;
+                subject.Invalidate();
+            }
+            if (ee.KeyCode == Keys.NumPad3)
+            { // SouthEast
+                subject.y_origin++;
+                subject.x_origin++;
+                subject.Invalidate();
             }
         } // OnKeyPress()
 
@@ -193,7 +248,7 @@ namespace OpenGLForm
 
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
-            tvp_control.Render();
+            subject_control.Render();
            
 
             glControl1.SwapBuffers();

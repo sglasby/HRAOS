@@ -109,6 +109,7 @@ public class TileViewPortControl
                         if (sp != null)
                         {
                             // FIXME: do the GL drawing here!!! sp.Draw(surface, pixel_xx, pixel_yy, null);
+                            this.blit_square_tile(view_xx, view_yy, sp.ID, 0);
                         }
                     } // foreach(LL)
                 }
@@ -137,6 +138,50 @@ public class TileViewPortControl
         } // for(view_yy)
 
     } // OnPaint()
+
+    public void blit_square_tile(int xx_pos, int yy_pos, int tile_index, int padding)
+    {
+        xx_pos = clamp(0, XX_POS_MAX, xx_pos);
+        yy_pos = clamp(0, YY_POS_MAX, yy_pos);
+        padding = clamp(0, 8, padding);
+
+        double xx = xx_pos * (TILE_WW + padding);
+        double yy = yy_pos * (TILE_HH + padding);
+
+        const double LL = -(TILE_WW / 2);
+        const double RR = +(TILE_WW / 2);
+        const double TT = +(TILE_HH / 2);
+        const double BB = -(TILE_HH / 2);
+
+        const double HALF_TILE_WW = TILE_WW / 2;
+        const double HALF_TILE_HH = TILE_HH / 2;
+        const double angle = 0.0;
+
+        GL.PushMatrix();
+        GL.Translate(HALF_TILE_WW + xx, (yy + HALF_TILE_HH), 0);
+        GL.Rotate(angle, 0.0, 0.0, -1.0);
+
+        GL.BindTexture(TextureTarget.Texture2D, tiles[tile_index]);
+        GL.Begin(BeginMode.Quads);
+
+        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(LL, BB);
+        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(RR, BB);
+        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(RR, TT);
+        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(LL, TT);
+
+        GL.End();
+
+        GL.PopMatrix();
+
+    } // blit_square_tile()
+
+    int clamp(int min, int max, int value)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return value;
+    }
+
 
     [BrowsableAttribute(false)]
     public int x_origin
