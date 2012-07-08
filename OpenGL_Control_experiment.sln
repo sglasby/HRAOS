@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGL_Control_experiment", "OpenGL_Control_experiment\OpenGL_Control_experiment.csproj", "{ACB80B7D-509B-40E4-9A44-2B700B4A8216}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGLForm", "OpenGLForm\OpenGLForm.csproj", "{98509524-6818-42B3-AE41-9497A518E45A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TileSheetStack", "TileSheetStack\TileSheetStack.csproj", "{85F511A9-0FA4-453A-8CD1-42811C4001F6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ACB80B7D-509B-40E4-9A44-2B700B4A8216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACB80B7D-509B-40E4-9A44-2B700B4A8216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACB80B7D-509B-40E4-9A44-2B700B4A8216}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACB80B7D-509B-40E4-9A44-2B700B4A8216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98509524-6818-42B3-AE41-9497A518E45A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98509524-6818-42B3-AE41-9497A518E45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98509524-6818-42B3-AE41-9497A518E45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98509524-6818-42B3-AE41-9497A518E45A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85F511A9-0FA4-453A-8CD1-42811C4001F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85F511A9-0FA4-453A-8CD1-42811C4001F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85F511A9-0FA4-453A-8CD1-42811C4001F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85F511A9-0FA4-453A-8CD1-42811C4001F6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
