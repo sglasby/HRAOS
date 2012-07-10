@@ -10,6 +10,9 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
+// TODO:
+// Refactoring to get rid of the (GDI+ and OpenTK) duplication of code
+// may involve moving everything out of Subject.cs into TileViewPortControl.cs ...
 namespace OpenGLForm
 {
     public enum TilingModes
@@ -22,15 +25,15 @@ namespace OpenGLForm
 
     public class Subject
     {
-        const int XX_POS_MAX = 24; // 25 == VIEW_WW / TILE_WW  so xx_pos can be 0..24
-        const int YY_POS_MAX = 17; // 18 == VIEW_HH / TILE_HH  so yy_pos can be 0..17
-        const int TILE_WW = 32;
-        const int TILE_HH = 32;
+        const int XX_POS_MAX     = 24; // 25 == VIEW_WW / TILE_WW  so xx_pos can be 0..24
+        const int YY_POS_MAX     = 17; // 18 == VIEW_HH / TILE_HH  so yy_pos can be 0..17
+        const int TILE_WW        = 32;
+        const int TILE_HH        = 32;
         const int SHEET_TILES_WW = 16;
         const int SHEET_TILES_HH = 16;
-        const int NUM_TILES = SHEET_TILES_WW * SHEET_TILES_HH;
-        const int SHEET_WW_PX = SHEET_TILES_WW * TILE_WW;
-        const int SHEET_HH_PX = SHEET_TILES_HH * TILE_HH;
+        const int NUM_TILES      = SHEET_TILES_WW * SHEET_TILES_HH;
+        const int SHEET_WW_PX    = SHEET_TILES_WW * TILE_WW;
+        const int SHEET_HH_PX    = SHEET_TILES_HH * TILE_HH;
 
         Bitmap bitmap;
         int texture;
@@ -43,11 +46,13 @@ namespace OpenGLForm
         public Subject()
         {
             bitmap = new Bitmap("U4.B_enhanced-32x32.png");
-            tiles = new int[NUM_TILES];
+            tiles  = new int[NUM_TILES];
         }
 
         public void LoadTextures()
         {
+            // TODO: Texture-loading code should abide within the TileSheet / TileSprite class...
+
             //GL.ClearColor(Color.CornflowerBlue);
             //GL.Enable(EnableCap.Texture2D);
 
@@ -165,8 +170,8 @@ namespace OpenGLForm
 
         public void blit_square_tile(int xx_pos, int yy_pos, int tile_index, int padding)
         {
-            xx_pos = clamp(0, XX_POS_MAX, xx_pos);
-            yy_pos = clamp(0, YY_POS_MAX, yy_pos);
+            xx_pos  = clamp(0, XX_POS_MAX, xx_pos);
+            yy_pos  = clamp(0, YY_POS_MAX, yy_pos);
             padding = clamp(0, 8, padding);
 
             double xx = xx_pos * (TILE_WW + padding);
@@ -200,8 +205,8 @@ namespace OpenGLForm
 
         void blit_hex_NS_tile(int xx_pos, int yy_pos, int tile_index, int padding)
         {
-            xx_pos = clamp(0, XX_POS_MAX, xx_pos);
-            yy_pos = clamp(0, YY_POS_MAX, yy_pos);
+            xx_pos  = clamp(0, XX_POS_MAX, xx_pos);
+            yy_pos  = clamp(0, YY_POS_MAX, yy_pos);
             padding = clamp(0, 8, padding);
 
             // Consider a right triangle with angles (90, 60, 30) and sides (1, Sqrt(3), hypotenuse 2)
@@ -220,8 +225,8 @@ namespace OpenGLForm
             //double HH = (WW / 2) * ROOT_3;  // 27.7128 pixels tall
             double HH = 32;
             double WW = (2.0 * HH) / ROOT_3;  // 36.9504 pixels wide
-            double w = (WW / 4);
-            double h = (WW / 4) * ROOT_3;
+            double w  = (WW / 4);
+            double h  = (WW / 4) * ROOT_3;
             //double side_length = (WW / 2);
 
             // Vertex coordinates along hex X and Y axis:
@@ -296,8 +301,8 @@ namespace OpenGLForm
 
         void blit_hex_WE_tile(int xx_pos, int yy_pos, int tile_index, int padding)
         {
-            xx_pos = clamp(0, XX_POS_MAX, xx_pos);
-            yy_pos = clamp(0, YY_POS_MAX, yy_pos);
+            xx_pos  = clamp(0, XX_POS_MAX, xx_pos);
+            yy_pos  = clamp(0, YY_POS_MAX, yy_pos);
             padding = clamp(0, 8, padding);
 
             // Consider a right triangle with angles (90, 60, 30) and sides (1, Sqrt(3), hypotenuse 2)
@@ -315,8 +320,8 @@ namespace OpenGLForm
             //double WW = (HH / 2.0) * ROOT_3;  // 27.7128 pixels wide
             double WW = 32;
             double HH = WW / (ROOT_3) * 2.0;    // 36.9504 pixels tall
-            double w = WW / 2.0;
-            double h = HH / 4.0;
+            double w  = WW / 2.0;
+            double h  = HH / 4.0;
             //double side_length = h / ROOT_3;
 
             // Vertex coordinates along hex X and Y axis:
@@ -395,5 +400,7 @@ namespace OpenGLForm
             if (value > max) return max;
             return value;
         }
-    }
-}
+
+    } // class
+
+} // namespace

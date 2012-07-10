@@ -19,8 +19,7 @@ public enum TilingModes
     Hex_WE
 }
 
-public class TileViewPortControl
-{
+public class TileViewPortControl {
     // A TileViewPort "has a" TileViewPortControl,
     // and draws within that control, being constrained 
     // by the Width and Height of same.
@@ -29,15 +28,15 @@ public class TileViewPortControl
     // X, Y, Width, Height
     // and various others
 
-    const int XX_POS_MAX = 24; // 25 == VIEW_WW / TILE_WW  so xx_pos can be 0..24
-    const int YY_POS_MAX = 17; // 18 == VIEW_HH / TILE_HH  so yy_pos can be 0..17
-    const int TILE_WW = 32;
-    const int TILE_HH = 32;
+    const int XX_POS_MAX     = 24; // 25 == VIEW_WW / TILE_WW  so xx_pos can be 0..24
+    const int YY_POS_MAX     = 17; // 18 == VIEW_HH / TILE_HH  so yy_pos can be 0..17
+    const int TILE_WW        = 32;
+    const int TILE_HH        = 32;
     const int SHEET_TILES_WW = 16;
     const int SHEET_TILES_HH = 16;
-    const int NUM_TILES = SHEET_TILES_WW * SHEET_TILES_HH;
-    const int SHEET_WW_PX = SHEET_TILES_WW * TILE_WW;
-    const int SHEET_HH_PX = SHEET_TILES_HH * TILE_HH;
+    const int NUM_TILES      = SHEET_TILES_WW * SHEET_TILES_HH;
+    const int SHEET_WW_PX    = SHEET_TILES_WW * TILE_WW;
+    const int SHEET_HH_PX    = SHEET_TILES_HH * TILE_HH;
 
     public TileViewPort owner;
     public int left_pad;  // Extra pixels on the left
@@ -49,47 +48,40 @@ public class TileViewPortControl
     OpenTK.GLControl gl_control;
     public TilingModes tiling_mode = TilingModes.Square;
 
-    public TileViewPortControl(OpenTK.GLControl gl_control)
-    {
+    public TileViewPortControl(OpenTK.GLControl gl_control) {
         this.gl_control = gl_control;
         bitmap = new Bitmap("U4.B_enhanced-32x32.png");
         tiles = new int[NUM_TILES];
     } // TileViewPortControl()
 
 
-    public int Width
-    {
+    public int Width {
         get { return gl_control.Width; }
     }
 
-    public int Height
-    {
+    public int Height {
         get { return gl_control.Height; }
     }
 
-    public void Invalidate()
-    {
+    public void Invalidate() {
         gl_control.Invalidate();
     }
-    public void Render()
-    {
-        if (owner == null)
-        {
+    public void Render() {
+        if (owner == null) {
             return;
             //throw new Exception("TileViewPortControl OnPaint() without owner");
         }
 
-        int tileWidth = owner.map.sheet.tileWidth;
+        int tileWidth  = owner.map.sheet.tileWidth;
         int tileHeight = owner.map.sheet.tileHeight;
 
-        GL.ClearColor(Color.Green); // Yay! .NET Colors can be used directly!
+        GL.ClearColor(Color.Green);  // Coordinates which are "off map" will remain this color
 
-
-        for (int view_yy = 0; view_yy < owner.height_tiles; view_yy++)
-        {
-
-            for (int view_xx = 0; view_xx < owner.width_tiles; view_xx++)
-            {
+        // TODO: 
+        // Iterating through an IGridIterable (TileViewPort, Map*Layer, etc) is common enough, 
+        // perhaps a suitable closure could be defined, to avoid buggy duplication of similar code blocks?
+        for (int view_yy = 0; view_yy < owner.height_tiles; view_yy++) {
+            for (int view_xx = 0; view_xx < owner.width_tiles; view_xx++) {
                 int map_xx = (owner.x_origin + view_xx);
                 int map_yy = (owner.y_origin + view_yy);
 
@@ -99,36 +91,36 @@ public class TileViewPortControl
                                map_yy < owner.map.height);
 
                 int pixel_xx = left_pad + (view_xx * tileWidth);
-                int pixel_yy = top_pad + (view_yy * tileHeight);
+                int pixel_yy = top_pad  + (view_yy * tileHeight);  // TODO: GDI+ origin is top-left, OpenGL origin is bottom-left.  Currently map flipped on Y axis...
 
-                if (on_map)
-                {
-                    foreach (int LL in MapLayers.MapRenderingOrder)
-                    {
-                        TileSprite sp = (TileSprite)owner.map.contents_at_LXY(LL, map_xx, map_yy);
-                        if (sp != null)
-                        {
-                            // FIXME: do the GL drawing here!!! sp.Draw(surface, pixel_xx, pixel_yy, null);
-                            this.blit_square_tile(view_xx, view_yy, sp.ID - 1, 0);
+                if (on_map) {
+                    foreach (int LL in MapLayers.MapRenderingOrder) {
+                        TileSprite sp = (TileSprite) owner.map.contents_at_LXY(LL, map_xx, map_yy);
+                        if (sp != null) {
+                            // sp.Draw(surface, pixel_xx, pixel_yy, null);  // previous GDI+ drawing code
+                            this.blit_square_tile(view_xx, view_yy, sp.ID - 1, 0);  // sp.ID is not the right thing...refactor TileSprite class to know the OpenGL texture id...
                         }
                     } // foreach(LL)
                 }
-                else
-                {
+                else {
                     // Put down a background color on non-map areas of the TileViewPort:
-                    // GL.clear()
+                    // GL.clear()  // The GL.ClearColor() call before the render loop should suffice...this else goes away?
                 }
 
-                foreach (int LL in ViewPortLayers.ViewPortRenderingOrder)
-                {
-                    // TODO: Is allocating this repeatedly a cause of slowness?
-                    Color transparent_color = Color.FromArgb(0x00, 0xFF, 0x00, 0xFF);
-                    ImageAttributes imageAttr = new ImageAttributes();
-                    imageAttr.SetColorKey(transparent_color, transparent_color, ColorAdjustType.Default);
+                // TODO: 
+                // With the (GDI+) drawing code commented out inside this loop,
+                // currently the ViewportLayers are not rendered...
+                // Probably need to fix TileSprite class first, as the sprite is from a different sheet than the terrain sprites are...
+                foreach (int LL in ViewPortLayers.ViewPortRenderingOrder) {
+                    // TODO: Is allocating these repeatedly a cause of slowness?  
+                    // ...imageAttr could be defined outside of the loop...
+                    // ...Assuming that this is still relevant with OpenGL rendering code...
+                    //Color transparent_color = Color.FromArgb(0x00, 0xFF, 0x00, 0xFF);
+                    //ImageAttributes imageAttr = new ImageAttributes();
+                    //imageAttr.SetColorKey(transparent_color, transparent_color, ColorAdjustType.Default);
 
-                    TileSprite sp = (TileSprite)owner.contents_at_LXY(LL, view_xx, view_yy);
-                    if (sp != null)
-                    {
+                    TileSprite sp = (TileSprite) owner.contents_at_LXY(LL, view_xx, view_yy);
+                    if (sp != null) {
                         //sp.Draw(surface, pixel_xx, pixel_yy, imageAttr);
                         // FIXME: gl drawing code!
                     }
@@ -139,8 +131,7 @@ public class TileViewPortControl
 
     } // OnPaint()
 
-    public void blit_square_tile(int xx_pos, int yy_pos, int tile_index, int padding)
-    {
+    public void blit_square_tile(int xx_pos, int yy_pos, int tile_index, int padding) {
         xx_pos = clamp(0, XX_POS_MAX, xx_pos);
         yy_pos = clamp(0, YY_POS_MAX, yy_pos);
         padding = clamp(0, 8, padding);
@@ -164,10 +155,14 @@ public class TileViewPortControl
         GL.BindTexture(TextureTarget.Texture2D, tiles[tile_index]);
         GL.Begin(BeginMode.Quads);
 
-        GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(LL, BB);
-        GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(RR, BB);
-        GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(RR, TT);
-        GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(LL, TT);
+        GL.TexCoord2(0.0f, 1.0f);
+        GL.Vertex2(LL, BB);
+        GL.TexCoord2(1.0f, 1.0f);
+        GL.Vertex2(RR, BB);
+        GL.TexCoord2(1.0f, 0.0f);
+        GL.Vertex2(RR, TT);
+        GL.TexCoord2(0.0f, 0.0f);
+        GL.Vertex2(LL, TT);
 
         GL.End();
 
@@ -175,30 +170,28 @@ public class TileViewPortControl
 
     } // blit_square_tile()
 
-    int clamp(int min, int max, int value)
-    {
-        if (value < min) return min;
-        if (value > max) return max;
+    int clamp(int min, int max, int value) {
+        if (value < min)
+            return min;
+        if (value > max)
+            return max;
         return value;
     }
 
 
     [BrowsableAttribute(false)]
-    public int x_origin
-    {
+    public int x_origin {
         get { return owner.x_origin; }
         set { owner.x_origin = value; }
     }
 
     [BrowsableAttribute(false)]
-    public int y_origin
-    {
+    public int y_origin {
         get { return owner.y_origin; }
         set { owner.y_origin = value; }
     }
 
-    public void LoadTextures()
-    {
+    public void LoadTextures() {
         //GL.ClearColor(Color.CornflowerBlue);
         //GL.Enable(EnableCap.Texture2D);
 
@@ -214,16 +207,14 @@ public class TileViewPortControl
                       OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
         bitmap.UnlockBits(data);
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
 
 
         GL.GenTextures(NUM_TILES, tiles);
         int xx, yy, ii;
-        for (yy = 0; yy < SHEET_TILES_HH; yy++)
-        {
-            for (xx = 0; xx < SHEET_TILES_WW; xx++)
-            {
+        for (yy = 0; yy < SHEET_TILES_HH; yy++) {
+            for (xx = 0; xx < SHEET_TILES_WW; xx++) {
                 ii = (yy * SHEET_TILES_WW) + xx;
                 //tiles[ii] = 1000 + ii;
                 GL.BindTexture(TextureTarget.Texture2D, tiles[ii]);
@@ -238,12 +229,11 @@ public class TileViewPortControl
 
                 bitmap.UnlockBits(bb);
 
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
 
             } // for(xx)
         } // for(yy)
     } // Load()
-
 
 } // class TileViewPortControl

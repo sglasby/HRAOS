@@ -12,7 +12,7 @@ public class TileViewPort
 {
     public TileViewPortControl control;
 
-    public int width_tiles { get; private set; }
+    public int width_tiles  { get; private set; }
     public int height_tiles { get; private set; }
 
     public int Width;  // width_pixels
@@ -23,20 +23,20 @@ public class TileViewPort
     public ViewPortScrollingConstraint constraint { get; set; }
 
     private int X_origin;  // relative to map
-    public int x_origin   // relative to map
+    public  int x_origin   // relative to map
     {
         get { return X_origin; }
         set { X_origin = GridUtility.Clamp(value, min_x_offset(), max_x_offset()); }
     } // x_origin()
 
     private int Y_origin;  // relative to map
-    public int y_origin   // relative to map
+    public  int y_origin   // relative to map
     {
         get { return Y_origin; }
         set { Y_origin = GridUtility.Clamp(value, min_y_offset(), max_y_offset()); }
     } // y_origin()
 
-    public int center_x() { return (width_tiles / 2); }
+    public int center_x() { return (width_tiles  / 2); }
     public int center_y() { return (height_tiles / 2); }
 
     public int min_x_offset()
@@ -111,30 +111,30 @@ public class TileViewPort
         if (tvp == null) { throw new ArgumentException("TileViewPort() - got null TileViewPortControl\n"); }
         if (map_arg == null) { throw new ArgumentException("TileViewPort() - got null Map\n"); }
 
-        control = tvp;
+        control   = tvp;
         tvp.owner = this;
 
-        width_tiles = ww;
+        width_tiles  = ww;
         height_tiles = hh;
-        constraint = constraint_arg;
-        map = map_arg;
-        x_origin = map_xx;
-        y_origin = map_yy;
+        constraint   = constraint_arg;
+        map          = map_arg;
+        x_origin     = map_xx;
+        y_origin     = map_yy;
 
-        this.Width = (width_tiles * map.sheet.tileWidth);
+        this.Width  = (width_tiles * map.sheet.tileWidth);
         this.Height = (height_tiles * map.sheet.tileHeight);
 
-        if (Width > control.Width) { throw new ArgumentException("TileViewPort() - tiles width  too large for control\n"); }
+        if (Width  > control.Width)  { throw new ArgumentException("TileViewPort() - tiles width  too large for control\n"); }
         if (Height > control.Height) { throw new ArgumentException("TileViewPort() - tiles height too large for control\n"); }
 
         setControlEdgeCentering();
 
         layers = new IGridIterable[ViewPortLayers.COUNT];
         layers[ViewPortLayers.UI_Elements] = new DenseGrid(width_tiles, height_tiles, 0);
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(center_x(), center_y(), 272);  // Center
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0, 0, 272);  // NW
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(width_tiles - 1, 0, 272);  // NE
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0, height_tiles - 1, 272);  // SW
+        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(center_x(),      center_y(),       272);  // Center
+        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,               0,                272);  // NW
+        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(width_tiles - 1, 0,                272);  // NE
+        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,               height_tiles - 1, 272);  // SW
         layers[ViewPortLayers.UI_Elements].set_contents_at_XY(width_tiles - 1, height_tiles - 1, 272);  // SE
 
 
@@ -147,14 +147,15 @@ public class TileViewPort
         // 
         // Setting the control size to an even number of pixels greater than needed 
         // for the intended tile width*height will thus provide a thin border around the tile region.
-        int viewport_pixels_ww = width_tiles * map.sheet.tileWidth;
+        int viewport_pixels_ww = width_tiles  * map.sheet.tileWidth;
         int viewport_pixels_hh = height_tiles * map.sheet.tileHeight;
 
-        int extra_ww = Math.Max(0, control.Width - viewport_pixels_ww);
+        int extra_ww = Math.Max(0, control.Width  - viewport_pixels_ww);
         int extra_hh = Math.Max(0, control.Height - viewport_pixels_hh);
 
+        // TODO: The edge-padding is all on the top and right; review this once the myriad duplication has been refactored out...
         control.left_pad = extra_ww / 2;
-        control.top_pad = extra_hh / 2;
+        control.top_pad  = extra_hh / 2;
     } // setControlEdgeCentering()
 
     public object contents_at_LXY(int layer, int xx, int yy)
@@ -207,6 +208,6 @@ public class TileViewPort
         control.Invalidate();
     } // Invalidate()
 
-   
+
 
 } // class TileViewPort

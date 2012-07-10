@@ -22,12 +22,16 @@ namespace OpenGLForm
 
         public string                ts_filename = "U4.B_enhanced-32x32.png";
         public System.Drawing.Bitmap bm_sheet;
-        Stopwatch sw = new Stopwatch(); // available to all event handlers
+        Stopwatch                    sw = new Stopwatch(); // available to all event handlers
         TileViewPortControl subject_control;
-        TileViewPort subject;
-        SimpleMapV1 map;
-        TileSheet ts;
+        TileViewPort        subject;
+        SimpleMapV1         map;
+        TileSheet           ts;
  
+        // TODO: 
+        // Much of the initialization in the Form1() constructor should live elsewhere.
+        // And the main form should have a better name than Form1, of course.
+        // Most of that refactoring can wait until the Form1.designer.cs file is emptied out...
         public Form1()
         {
             InitializeComponent();
@@ -37,6 +41,10 @@ namespace OpenGLForm
             //subject_control.Location = new System.Drawing.Point(0, 0);
             //subject_control.Size = new System.Drawing.Size(729, 764);
 
+            // TODO:
+            // Code from the pre-merge TileViewPort demo which loads the "ui_ts" tilesheet 
+            // (marquee tiles for the ViewPortLayers tiles) should be added back in...
+            // Pre-requisite to that is refactoring the TileSprite class, and for the drawing code to use OpenGL texture IDs from TileSprite objects...
             string filename = @"U4.B_enhanced-32x32.png";
             ts = new TileSheet(filename, 16, 16);
 
@@ -49,14 +57,14 @@ namespace OpenGLForm
             };
 
             DenseGrid map_16x128 = new DenseGrid(16, 128, 77);
-            DenseGrid flip_none = new DenseGrid(5, 4, path_rect_5x4);  // Test with width != height
-            DenseGrid flip_we = flip_none.Flip_WE();
-            DenseGrid flip_ns = flip_none.Flip_NS();
-            DenseGrid flip_wens = flip_we.Flip_NS();
+            DenseGrid flip_none  = new DenseGrid( 5,   4, path_rect_5x4);  // Test with width != height
+            DenseGrid flip_we    = flip_none.Flip_WE();
+            DenseGrid flip_ns    = flip_none.Flip_NS();
+            DenseGrid flip_wens  = flip_we.Flip_NS();
 
             DenseGrid.BlitFromAOntoB(flip_none, map_16x128, 1, 1);
-            DenseGrid.BlitFromAOntoB(flip_we, map_16x128, 7, 1);
-            DenseGrid.BlitFromAOntoB(flip_ns, map_16x128, 1, 7);
+            DenseGrid.BlitFromAOntoB(flip_we,   map_16x128, 7, 1);
+            DenseGrid.BlitFromAOntoB(flip_ns,   map_16x128, 1, 7);
             DenseGrid.BlitFromAOntoB(flip_wens, map_16x128, 7, 7);
 
             map = new SimpleMapV1(16, 128, ts);
@@ -104,12 +112,10 @@ namespace OpenGLForm
 
         private void glControl1_Load(object sender, EventArgs e)
         {
+            glControl1.Width  = 484;
+            glControl1.Height = 484;
 
             SetupViewport();
-
-            glControl1.Width  = 512;
-            glControl1.Height = 512;
-
 
             //TexUtil.InitTexturing();
             GL.Disable(EnableCap.CullFace);
@@ -122,7 +128,7 @@ namespace OpenGLForm
             GL.ClearColor(Color.SkyBlue); // Yay! .NET Colors can be used directly!
             subject_control.LoadTextures();
 
-            Application.Idle += Application_Idle; // press TAB twice after +=
+            Application.Idle      += Application_Idle;  // press TAB twice after +=
             this.glControl1.KeyUp += new KeyEventHandler(OnKeyPress);
 
             sw.Start(); // start at application boot
