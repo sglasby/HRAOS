@@ -1,18 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-using System.Windows.Forms;
+﻿using System.ComponentModel;  // for [BrowseableAttribute] (may be able to remove after refactoring...)
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-public enum TilingModes
-{
+public enum TilingModes {
     None = 0,
     Square,
     Hex_NS,
@@ -39,19 +30,18 @@ public class TileViewPortControl {
     const int SHEET_HH_PX    = SHEET_TILES_HH * TILE_HH;
 
     public TileViewPort owner;
+    OpenTK.GLControl    gl_control;  // TODO: TileViewPortControl needs to be refactored so that it _inherits_ from GLControl, rather than "hasa"
+    public TilingModes  tiling_mode = TilingModes.Square;
     public int left_pad;  // Extra pixels on the left
     public int top_pad;   // Extra pixels on the top
 
     Bitmap bitmap;
-    int texture;
     int[] tiles;
-    OpenTK.GLControl gl_control;
-    public TilingModes tiling_mode = TilingModes.Square;
 
     public TileViewPortControl(OpenTK.GLControl gl_control) {
         this.gl_control = gl_control;
         bitmap = new Bitmap("U4.B_enhanced-32x32.png");
-        tiles = new int[NUM_TILES];
+        tiles  = new int[NUM_TILES];
     } // TileViewPortControl()
 
 
@@ -66,6 +56,7 @@ public class TileViewPortControl {
     public void Invalidate() {
         gl_control.Invalidate();
     }
+
     public void Render() {
         if (owner == null) {
             return;
@@ -91,14 +82,14 @@ public class TileViewPortControl {
                                map_yy < owner.map.height);
 
                 int pixel_xx = left_pad + (view_xx * tileWidth);
-                int pixel_yy = top_pad  + (view_yy * tileHeight);  // TODO: GDI+ origin is top-left, OpenGL origin is bottom-left.  Currently map flipped on Y axis...
+                int pixel_yy = top_pad  + (view_yy * tileHeight);  
+                // TODO: GDI+ origin is top-left, OpenGL origin is bottom-left.  Therefore, currently map is flipped on Y axis...
 
                 if (on_map) {
                     foreach (int LL in MapLayers.MapRenderingOrder) {
                         TileSprite sp = (TileSprite) owner.map.contents_at_LXY(LL, map_xx, map_yy);
                         if (sp != null) {
-                            // sp.Draw(surface, pixel_xx, pixel_yy, null);  // previous GDI+ drawing code
-                            this.blit_square_tile(view_xx, view_yy, sp.ID - 1, 0);  // sp.ID is not the right thing...refactor TileSprite class to know the OpenGL texture id...
+                            this.blit_square_tile(view_xx, view_yy, sp.texture, 0);
                         }
                     } // foreach(LL)
                 }
@@ -129,9 +120,9 @@ public class TileViewPortControl {
             } // for(view_xx)
         } // for(view_yy)
 
-    } // OnPaint()
+    } // was previously named TileViewPortControl.OnPaint(), and may become that again ...
 
-    public void blit_square_tile(int xx_pos, int yy_pos, int tile_index, int padding) {
+    public void blit_square_tile(int xx_pos, int yy_pos, int texture_ID, int padding) {
         xx_pos = clamp(0, XX_POS_MAX, xx_pos);
         yy_pos = clamp(0, YY_POS_MAX, yy_pos);
         padding = clamp(0, 8, padding);
@@ -152,7 +143,7 @@ public class TileViewPortControl {
         GL.Translate(HALF_TILE_WW + xx, (yy + HALF_TILE_HH), 0);
         GL.Rotate(angle, 0.0, 0.0, -1.0);
 
-        GL.BindTexture(TextureTarget.Texture2D, tiles[tile_index]);
+        GL.BindTexture(TextureTarget.Texture2D, texture_ID);
         GL.Begin(BeginMode.Quads);
 
         GL.TexCoord2(0.0f, 1.0f);
@@ -171,6 +162,7 @@ public class TileViewPortControl {
     } // blit_square_tile()
 
     int clamp(int min, int max, int value) {
+        // TODO: Various versions of this exist, such as GridUtility.Clamp(), should be unified...
         if (value < min)
             return min;
         if (value > max)
@@ -191,49 +183,5 @@ public class TileViewPortControl {
         set { owner.y_origin = value; }
     }
 
-    public void LoadTextures() {
-        //GL.ClearColor(Color.CornflowerBlue);
-        //GL.Enable(EnableCap.Texture2D);
-
-        GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-        GL.GenTextures(1, out texture);
-        GL.BindTexture(TextureTarget.Texture2D, texture);
-
-        BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, SHEET_WW_PX, SHEET_HH_PX),
-                              ImageLockMode.ReadOnly,
-                              System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                      data.Width, data.Height, 0,
-                      OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-        bitmap.UnlockBits(data);
-
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
-
-
-        GL.GenTextures(NUM_TILES, tiles);
-        int xx, yy, ii;
-        for (yy = 0; yy < SHEET_TILES_HH; yy++) {
-            for (xx = 0; xx < SHEET_TILES_WW; xx++) {
-                ii = (yy * SHEET_TILES_WW) + xx;
-                //tiles[ii] = 1000 + ii;
-                GL.BindTexture(TextureTarget.Texture2D, tiles[ii]);
-
-                BitmapData bb = bitmap.LockBits(new System.Drawing.Rectangle(xx * TILE_WW, yy * TILE_HH, TILE_WW, TILE_HH),
-                                                  ImageLockMode.ReadOnly,
-                                                  System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-                              bb.Width, bb.Height, 0,
-                              OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bb.Scan0);
-
-                bitmap.UnlockBits(bb);
-
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
-
-            } // for(xx)
-        } // for(yy)
-    } // Load()
 
 } // class TileViewPortControl

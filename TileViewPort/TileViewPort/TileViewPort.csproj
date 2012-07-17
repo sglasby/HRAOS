@@ -45,7 +45,7 @@
     <Compile Include="MapSparseGridLayer.cs" />
     <Compile Include="ObjectRegistrar.cs" />
     <Compile Include="Rect.cs" />
-    <Compile Include="SimpleMapV0.cs" />
+    <Compile Include="SimpleMapV1.cs" />
     <Compile Include="TileSheet.cs" />
     <Compile Include="TileViewPort.cs" />
     <Compile Include="TileViewPortControl.cs" />

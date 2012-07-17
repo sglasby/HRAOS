@@ -1,12 +1,4 @@
 ﻿using System;
-//using System.ComponentModel;
-//using System.Windows.Forms;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-
 
 public class TileViewPort
 {
@@ -20,7 +12,7 @@ public class TileViewPort
 
     public SimpleMapV1 map { get; private set; }
     public IGridIterable[] layers;
-    public ViewPortScrollingConstraint constraint { get; set; }
+    public ScrollConstraint constraint { get; set; }
 
     private int X_origin;  // relative to map
     public  int x_origin   // relative to map
@@ -43,11 +35,11 @@ public class TileViewPort
     {
         switch (constraint)
         {
-            case ViewPortScrollingConstraint.EntireMap:
+            case ScrollConstraint.EntireMap:
                 return 0;
-            case ViewPortScrollingConstraint.CenterTile:
+            case ScrollConstraint.CenterTile:
                 return -(center_x());
-            case ViewPortScrollingConstraint.EdgeCorner:
+            case ScrollConstraint.EdgeCorner:
                 return -(width_tiles - 1);
             default:
                 throw new Exception("Got impossible ViewPortScrollingConstraint");
@@ -59,11 +51,11 @@ public class TileViewPort
     {
         switch (constraint)
         {
-            case ViewPortScrollingConstraint.EntireMap:
+            case ScrollConstraint.EntireMap:
                 return 0;
-            case ViewPortScrollingConstraint.CenterTile:
+            case ScrollConstraint.CenterTile:
                 return -(center_y());
-            case ViewPortScrollingConstraint.EdgeCorner:
+            case ScrollConstraint.EdgeCorner:
                 return -(height_tiles - 1);
             default:
                 throw new Exception("Got impossible ViewPortScrollingConstraint");
@@ -74,11 +66,11 @@ public class TileViewPort
     {
         switch (constraint)
         {
-            case ViewPortScrollingConstraint.EntireMap:
+            case ScrollConstraint.EntireMap:
                 return (map.width - this.width_tiles);
-            case ViewPortScrollingConstraint.CenterTile:
+            case ScrollConstraint.CenterTile:
                 return (map.width - (center_x() + 1));
-            case ViewPortScrollingConstraint.EdgeCorner:
+            case ScrollConstraint.EdgeCorner:
                 return (map.width - 1);
             default:
                 throw new Exception("Got impossible ViewPortScrollingConstraint");
@@ -89,11 +81,11 @@ public class TileViewPort
     {
         switch (constraint)
         {
-            case ViewPortScrollingConstraint.EntireMap:
+            case ScrollConstraint.EntireMap:
                 return (map.height - this.height_tiles);
-            case ViewPortScrollingConstraint.CenterTile:
+            case ScrollConstraint.CenterTile:
                 return (map.height - (center_y() + 1));
-            case ViewPortScrollingConstraint.EdgeCorner:
+            case ScrollConstraint.EdgeCorner:
                 return (map.height - 1);
             default:
                 throw new Exception("Got impossible ViewPortScrollingConstraint");
@@ -105,10 +97,10 @@ public class TileViewPort
 
     public TileViewPort(TileViewPortControl tvp,
                 int ww, int hh,
-                ViewPortScrollingConstraint constraint_arg,
+                ScrollConstraint constraint_arg,
                 SimpleMapV1 map_arg, int map_xx, int map_yy)
     {
-        if (tvp == null) { throw new ArgumentException("TileViewPort() - got null TileViewPortControl\n"); }
+        if (tvp     == null) { throw new ArgumentException("TileViewPort() - got null TileViewPortControl\n"); }
         if (map_arg == null) { throw new ArgumentException("TileViewPort() - got null Map\n"); }
 
         control   = tvp;
@@ -121,7 +113,7 @@ public class TileViewPort
         x_origin     = map_xx;
         y_origin     = map_yy;
 
-        this.Width  = (width_tiles * map.sheet.tileWidth);
+        this.Width  = (width_tiles  * map.sheet.tileWidth);
         this.Height = (height_tiles * map.sheet.tileHeight);
 
         if (Width  > control.Width)  { throw new ArgumentException("TileViewPort() - tiles width  too large for control\n"); }
@@ -147,6 +139,7 @@ public class TileViewPort
         // 
         // Setting the control size to an even number of pixels greater than needed 
         // for the intended tile width*height will thus provide a thin border around the tile region.
+        // TODO: Not working, see below...
         int viewport_pixels_ww = width_tiles  * map.sheet.tileWidth;
         int viewport_pixels_hh = height_tiles * map.sheet.tileHeight;
 

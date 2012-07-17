@@ -1,28 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
-//using System.Windows.Forms;
 
-
-
-
-    // TODO: Split off the various utility / constants classes into their own file/files...
+// TODO: Perhaps split off the various utility / constants classes/enums/interfaces into their own files...
 
 public class MapLayers  // Layers which exist on a map
 {
-    public const int Terrain = 0;
-    public const int Features = 1;
-    public const int Items = 2;
-    public const int Vehicles = 3;
-    public const int Beings = 4;
-    public const int Fields = 5;  // Also fogs, fires, etc
+    public const int Terrain    = 0;
+    public const int Features   = 1;
+    public const int Items      = 2;
+    public const int Vehicles   = 3;
+    public const int Beings     = 4;
+    public const int Fields     = 5;  // Also fogs, fires, etc
     public const int Fog_of_War = 6;  // 
 
     public const int COUNT = 7;
-    public const int MIN = 0;
-    public const int MAX = Fog_of_War;
+    public const int MIN   = 0;
+    public const int MAX   = Fog_of_War;
 
     public static int[] MapRenderingOrder = { Terrain, Beings };
 } // MapLayers
@@ -32,13 +24,13 @@ public class ViewPortLayers  // Layers which exist on a ViewPort
     public const int UI_Elements = 0;  // Cursors, boundary lines, etc
 
     public const int COUNT = 1;
-    public const int MIN = 0;
-    public const int MAX = UI_Elements;
+    public const int MIN   = 0;
+    public const int MAX   = UI_Elements;
 
     public static int[] ViewPortRenderingOrder = { UI_Elements };
 } // class ViewPortLayers
 
-public enum ViewPortScrollingConstraint
+public enum ScrollConstraint
 {
     EntireMap,   // No ViewPort tile may be off-map
     CenterTile,  // The center tile of the ViewPort must be on-map
@@ -47,7 +39,7 @@ public enum ViewPortScrollingConstraint
 
 public interface IGridIterable
 {
-    int width { get; set; }
+    int width  { get; set; }
     int height { get; set; }
 
     int min_x();
@@ -72,8 +64,8 @@ public interface IGridIterable
 
 public class SimpleMapV1
 {
-    public int width { get; set; }
-    public int height { get; set; }
+    public int width       { get; set; }
+    public int height      { get; set; }
     public TileSheet sheet { get; private set; } // This belongs elsewhere, after implementation bootstrapping...
     public IGridIterable[] layers;
     // TODO: Add support for "default object/terrain", likely on a per-layer basis...
@@ -114,9 +106,9 @@ public class SimpleMapV1
     {
         if (layer < MapLayers.MIN) { return null; }
         if (layer > MapLayers.MAX) { return null; }
-        if (xx < 0) { return null; }
-        if (xx >= width) { return null; }
-        if (yy < 0) { return null; }
+        if (xx <  0)      { return null; }
+        if (xx >= width)  { return null; }
+        if (yy <  0)      { return null; }
         if (yy >= height) { return null; }
 
         if (layers[layer] == null)
@@ -124,6 +116,8 @@ public class SimpleMapV1
             throw new ArgumentException("Got invalid layer");
         }
         // More refactoring coming up, once the map data is object_IDs rather than sprite_IDs...
+        // For that matter, does one generally want (the obj reference, or the obj ID) to be returned from such a method?
+        // Possibly we want an overload to get either?  Study how it is used in practice, refactor to match most convenient mode of use...
         int sprite_ID = layers[layer].contents_at_XY(xx, yy);
         return ObjectRegistrar.Sprites.obj_for_ID(sprite_ID);
     } // contents_at_LXY()
@@ -133,5 +127,5 @@ public class SimpleMapV1
 } // class SimpleMapV1
 
 
-    // TODO: Add constructor for new GridLayer of (ww * hh) with (fill)
-    // TODO: Add some "blit" and "add element" methods
+// TODO: Add constructor for new GridLayer of (ww * hh) with (fill)
+// TODO: Add some "blit" and "add element" methods
