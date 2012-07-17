@@ -95,17 +95,6 @@ public class TileSheet {
 
         Load_GL_Textures_for_TileSheet();
 
-        for (int ii = 0; ii < num_tiles; ii++) {
-            int tiles_xx = GridUtility.XforIW(ii, width);
-            int tiles_yy = GridUtility.YforIW(ii, width);
-
-            int xx = x_offset + (GridUtility.XforIW(ii, width) * tileWidth) + (x_spacing * GridUtility.XforIW(ii, tileWidth));
-            int yy = y_offset + (GridUtility.YforIW(ii, width) * tileHeight) + (y_spacing * GridUtility.YforIW(ii, tileHeight));
-
-
-            tile_rects[ii] = new TileSprite(this, GL_textures[ii], xx, yy, tileWidth, tileHeight);
-        }
-
         return;
     } // tileSheet()
 
@@ -121,33 +110,18 @@ public class TileSheet {
 
     public void Load_GL_Textures_for_TileSheet() {
         GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-
-        // ??? Is the block below needful?  It creates a texture out of the entire sheet...
-//        BitmapData data = sheet.LockBits(new System.Drawing.Rectangle(0, 0, sheet.Width, sheet.Height),
-//                              ImageLockMode.ReadOnly,
-//                              System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-//        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-//                      data.Width, data.Height, 0,
-//                      OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-//        sheet.UnlockBits(data);
-
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
-
-
         GL.GenTextures(num_tiles, GL_textures);
         int xx, yy, ii;
         for (yy = 0; yy < this.height; yy++) {
             for (xx = 0; xx < this.width; xx++) {
-                ii = (yy * this.width) + xx;  // Use a GridUtility method call for this?
+                ii = GridUtility.indexForXYW(xx, yy, this.width);
                 GL.BindTexture(TextureTarget.Texture2D, GL_textures[ii]);
-
-                // FIXME: the Rectangle below assumes that (x_offset, y_offset, x_spacing, y_spacing) are all zero ...
-                Rectangle  this_tile = new Rectangle(xx * tileWidth, yy * tileHeight, tileWidth, tileHeight);
-                BitmapData tile_data = sheet.LockBits(this_tile,
+                Rectangle  tile_rect = rect_for_tile(xx, yy);
+                BitmapData tile_data = sheet.LockBits(tile_rect,
                                                       ImageLockMode.ReadOnly,
                                                       System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
                 GL.TexImage2D(TextureTarget.Texture2D,
                               0,
                               PixelInternalFormat.Rgba,
@@ -157,12 +131,8 @@ public class TileSheet {
                               OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
                               PixelType.UnsignedByte,
                               tile_data.Scan0);
-
                 sheet.UnlockBits(tile_data);
-
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
-
+                tile_rects[ii] = new TileSprite(this, GL_textures[ii], tile_rect);
             } // for(xx)
         } // for(yy)
     } // Load_GL_Textures_for_TileSheet()
@@ -174,7 +144,7 @@ public class TileSheet {
             if (tile_index > maxIndex) { return null; }
             return tile_rects[tile_index];
         }
-    }
+    } // indexer[ii]
 
     public TileSprite this[int column, int row] {
         get {
@@ -183,7 +153,23 @@ public class TileSheet {
             if (tile_index > maxIndex) { return null; }
             return tile_rects[tile_index];
         }
-    }
+    } // indexer[column,row]
+
+    public Rectangle rect_for_tile(int xx_column, int yy_row) {
+        int       rect_xx = x_offset + (xx_column * tileWidth)  + (x_spacing * xx_column);
+        int       rect_yy = y_offset + (yy_row    * tileHeight) + (y_spacing * yy_row);
+        Rectangle rect    = new Rectangle(rect_xx, rect_yy, tileWidth, tileHeight);
+        return rect;
+    } // rect_for_tile(xx,yy)
+
+    public Rectangle rect_for_tile(int ii) {
+        int       xx      = GridUtility.XforIW(ii, this.width);
+        int       yy      = GridUtility.YforIW(ii, this.width);
+        int       rect_xx = x_offset + (xx * tileWidth)  + (x_spacing * xx);
+        int       rect_yy = y_offset + (yy * tileHeight) + (y_spacing * yy);
+        Rectangle rect    = new Rectangle(rect_xx, rect_yy, tileWidth, tileHeight);
+        return rect;
+    } // rect_for_tile(ii)
 
     public int maxIndex {
         get {
@@ -215,7 +201,14 @@ public class TileSprite : ObjectRegistrar.IHaximaSerializeable {
         this.texture    = OpenGL_texture_id;
         this.rect       = new Rectangle(xx, yy, ww, hh);
         this.ID         = ObjectRegistrar.Sprites.register_obj(this);
-    } // TileSprite()
+    } // TileSprite(sh,tex,x,y,w,h)
+
+    public TileSprite(TileSheet tile_sheet, int OpenGL_texture_id, Rectangle rect) {
+        this.tile_sheet = tile_sheet;
+        this.texture    = OpenGL_texture_id;
+        this.rect       = rect;
+        this.ID         = ObjectRegistrar.Sprites.register_obj(this);
+    } // TileSprite(sh,tex,Rectangle)
 
     // TODO: 
     // Perhaps move square/hex tile drawing methods from TileViewPortControl into TileSprite ...
