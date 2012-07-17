@@ -200,19 +200,10 @@ public class TileSheet {
 
 
 
-// TODO:
-// Some of the current contents of TileSprite are specific to the needs of GDI+ drawing code, such as the original Draw() method.
-// The OpenGL texture loading code needs to exist in the TileSprite constructor
-//     (It is possible that noticeable efficiency would come from 
-//      loading a tile sheet worth of textures in the TileSheet constructor.)
-// TileSprite would then need to have a property for the OpenGL texture ID (integer), 
-// which is needed by the tile blitting code 
-//     (currently blit_square_tile() in TileViewPortControl.cs or Subject.cs, 
-//      one of these will go away...)
 public class TileSprite : ObjectRegistrar.IHaximaSerializeable {
     public TileSheet tile_sheet { get; private set; }
-    public Image image { get { return tile_sheet.sheet; } }
-    public Rectangle rect  { get; private set; }
+    public Image     image      { get { return tile_sheet.sheet; } }
+    public Rectangle rect       { get; private set; }
 
     public int    ID  { get; private set; }
     public string tag { get { return String.Format("{0}-{1}", ObjectRegistrar.Sprites.tag_prefix, ID); } }
@@ -220,10 +211,10 @@ public class TileSprite : ObjectRegistrar.IHaximaSerializeable {
     public int texture { get; private set; }
 
     public TileSprite(TileSheet tile_sheet, int OpenGL_texture_id, int xx, int yy, int ww, int hh) {
-        this.tile_sheet   = tile_sheet;
-        this.texture = OpenGL_texture_id;
-        this.rect    = new Rectangle(xx, yy, ww, hh);
-        this.ID      = ObjectRegistrar.Sprites.register_obj(this);
+        this.tile_sheet = tile_sheet;
+        this.texture    = OpenGL_texture_id;
+        this.rect       = new Rectangle(xx, yy, ww, hh);
+        this.ID         = ObjectRegistrar.Sprites.register_obj(this);
     } // TileSprite()
 
     // TODO: 
