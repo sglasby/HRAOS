@@ -41,7 +41,7 @@ using System.Text;
             if (yy < min_y()) { return 0; }
             if (yy > max_y()) { return 0; }
 
-            int XY_key = (yy * GridUtility.max_height) + xx;
+            int XY_key   = (yy * GridUtility.max_width) + xx;
             int contents = 0;
             grid_dict.TryGetValue(XY_key, out contents);
             return contents;
@@ -54,7 +54,7 @@ using System.Text;
             if (yy < min_y()) { return 0; }
             if (yy > max_y()) { return 0; }
 
-            int XY_key = (yy * GridUtility.max_height) + xx;
+            int XY_key        = (yy * GridUtility.max_width) + xx;
             grid_dict[XY_key] = new_contents;
             return grid_dict[XY_key];  // Return what was set
         } // set_contents_at_XY()
@@ -62,10 +62,10 @@ using System.Text;
         public int min_x() { return 0; }
         public int min_y() { return 0; }
 
-        public int center_x() { return width / 2; }
+        public int center_x() { return width  / 2; }
         public int center_y() { return height / 2; }
 
-        public int max_x() { return Math.Max(0, width - 1); }
+        public int max_x() { return Math.Max(0, width  - 1); }
         public int max_y() { return Math.Max(0, height - 1); }
 
     } // class MapSparseGridLayer

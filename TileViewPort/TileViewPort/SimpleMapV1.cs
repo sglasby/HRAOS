@@ -21,7 +21,8 @@ public class MapLayers  // Layers which exist on a map
 
 public class ViewPortLayers  // Layers which exist on a ViewPort
 {
-    public const int UI_Elements = 0;  // Cursors, boundary lines, etc
+    public const int UI_Elements = 0;  // Cursors, boundary lines, etc 
+    // (Likely more than one layer in this set, once definite purposes are defined)
 
     public const int COUNT = 1;
     public const int MIN   = 0;
@@ -72,21 +73,16 @@ public class SimpleMapV1
 
     public SimpleMapV1(int ww, int hh, TileSheet ts)
     {
-        if ((ww < 1) || (ww > GridUtility.max_width)) { throw new ArgumentException("invalid width"); }
+        if ((ww < 1) || (ww > GridUtility.max_width )) { throw new ArgumentException("invalid width"); }
         if ((hh < 1) || (hh > GridUtility.max_height)) { throw new ArgumentException("invalid height"); }
         if (ts == null) { throw new ArgumentException("invalid tilesheet"); }
 
-        width = ww;
+        width  = ww;
         height = hh;
-        sheet = ts;
+        sheet  = ts;
         layers = new IGridIterable[MapLayers.COUNT];
-
         layers[MapLayers.Terrain] = new MapCompositedLayer(width, height);
-
-        layers[MapLayers.Beings] = new MapSparseGridLayer(width, height, null);
-        //layers[MapLayers.Beings].set_contents_at_XY(2, 1, 33);  // Wizard
-        //layers[MapLayers.Beings].set_contents_at_XY(8, 7, 21);  // Horse
-
+        layers[MapLayers.Beings]  = new MapSparseGridLayer(width, height, null);
     } // SimpleMapV1() with MapCompositedLayer
 
 

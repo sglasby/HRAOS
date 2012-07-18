@@ -57,7 +57,7 @@ public class TileViewPortControl {
         gl_control.Invalidate();
     }
 
-    public void Render() {
+    public void Render(int frame) {
         if (owner == null) {
             return;
             //throw new Exception("TileViewPortControl OnPaint() without owner");
@@ -87,9 +87,9 @@ public class TileViewPortControl {
 
                 if (on_map) {
                     foreach (int LL in MapLayers.MapRenderingOrder) {
-                        TileSprite sp = (TileSprite) owner.map.contents_at_LXY(LL, map_xx, map_yy);
+                        ITileSprite sp = (ITileSprite) owner.map.contents_at_LXY(LL, map_xx, map_yy);
                         if (sp != null) {
-                            this.blit_square_tile(view_xx, view_yy, sp.texture, 0);
+                            this.blit_square_tile(view_xx, view_yy, sp.texture(frame), 0);
                         }
                     } // foreach(LL)
                 }
@@ -110,10 +110,9 @@ public class TileViewPortControl {
                     //ImageAttributes imageAttr = new ImageAttributes();
                     //imageAttr.SetColorKey(transparent_color, transparent_color, ColorAdjustType.Default);
 
-                    TileSprite sp = (TileSprite) owner.contents_at_LXY(LL, view_xx, view_yy);
+                    ITileSprite sp = (ITileSprite) owner.contents_at_LXY(LL, view_xx, view_yy);
                     if (sp != null) {
-                        //sp.Draw(surface, pixel_xx, pixel_yy, imageAttr);
-                        // FIXME: gl drawing code!
+                            this.blit_square_tile(view_xx, view_yy, sp.texture(frame), 0);
                     }
                 } // foreach(LL)
 
@@ -132,8 +131,8 @@ public class TileViewPortControl {
 
         const double LL = -(TILE_WW / 2);
         const double RR = +(TILE_WW / 2);
-        const double TT = +(TILE_HH / 2);
-        const double BB = -(TILE_HH / 2);
+        const double TT = -(TILE_HH / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
+        const double BB = +(TILE_HH / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
 
         const double HALF_TILE_WW = TILE_WW / 2;
         const double HALF_TILE_HH = TILE_HH / 2;
@@ -142,6 +141,10 @@ public class TileViewPortControl {
         GL.PushMatrix();
         GL.Translate(HALF_TILE_WW + xx, (yy + HALF_TILE_HH), 0);
         GL.Rotate(angle, 0.0, 0.0, -1.0);
+
+        //GL.Enable(EnableCap.Blend);
+        //GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+        //GL.Color4(1f, 1f, 1f, 1f);  // alas no transparency...
 
         GL.BindTexture(TextureTarget.Texture2D, texture_ID);
         GL.Begin(BeginMode.Quads);

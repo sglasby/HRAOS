@@ -38,6 +38,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AnimTileSprite.cs" />
+    <Compile Include="ITileSprite.cs" />
+    <Compile Include="StaticTileSprite.cs" />
     <Compile Include="HaxObj.cs" />
     <Compile Include="MapCompositedLayer.cs" />
     <Compile Include="MapDenseBitLayer.cs" />

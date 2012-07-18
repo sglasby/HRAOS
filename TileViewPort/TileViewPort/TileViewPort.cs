@@ -120,16 +120,8 @@ public class TileViewPort
         if (Height > control.Height) { throw new ArgumentException("TileViewPort() - tiles height too large for control\n"); }
 
         setControlEdgeCentering();
-
         layers = new IGridIterable[ViewPortLayers.COUNT];
         layers[ViewPortLayers.UI_Elements] = new DenseGrid(width_tiles, height_tiles, 0);
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(center_x(),      center_y(),       272);  // Center
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,               0,                272);  // NW
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(width_tiles - 1, 0,                272);  // NE
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,               height_tiles - 1, 272);  // SW
-        layers[ViewPortLayers.UI_Elements].set_contents_at_XY(width_tiles - 1, height_tiles - 1, 272);  // SE
-
-
     } // TileViewPort(tvp, ww,hh, constraint, map,x,y)
 
     private void setControlEdgeCentering()
@@ -156,9 +148,9 @@ public class TileViewPort
         // TODO: The arg checking here implies that xx and yy are relative to the viewport, not the map...
         if (layer < MapLayers.MIN) { return null; }
         if (layer > MapLayers.MAX) { return null; }
-        if (xx < 0) { return null; }
-        if (xx >= width_tiles) { return null; }
-        if (yy < 0) { return null; }
+        if (xx <  0)            { return null; }
+        if (xx >= width_tiles)  { return null; }
+        if (yy <  0)            { return null; }
         if (yy >= height_tiles) { return null; }
 
         if (layers[layer] == null)

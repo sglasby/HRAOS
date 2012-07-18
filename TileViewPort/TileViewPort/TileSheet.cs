@@ -30,14 +30,13 @@ public class TileSheet {
     public int y_spacing  { get; set; }  // 0..n (usually 0), num blank pixels between rows
 
     public Bitmap sheet { get; private set; }
-    TileSprite[]  tile_rects;
-    int[]         GL_textures;
+    StaticTileSprite[]  tile_rects;
 
     public TileSheet(string file_name_arg,
                      int sheet_width_arg, int sheet_height_arg,
                      int tile_width_arg,  int tile_height_arg,
                      int x_offset_arg,    int y_offset_arg,
-                     int x_spacing_arg,   int y_spacing_arg) {
+                     int x_spacing_arg, int y_spacing_arg) {
         // Note: 
         // The TileSheet constructor makes OpenGL calls to load texture data,
         // and as such, needs to be called after the OpenGL system is initialized
@@ -59,9 +58,9 @@ public class TileSheet {
         this.fileName = file_name_arg;
 
         // Check sheet and tile dimension args:
-        if (tile_width_arg   < 1) { throw (new Exception("Invalid tile width")); }
-        if (tile_height_arg  < 1) { throw (new Exception("Invalid tile height")); }
-        if (sheet_width_arg  < 1) { throw (new Exception("Invalid sheet width")); }
+        if (tile_width_arg   < 1) { throw (new Exception("Invalid tile width"  )); }
+        if (tile_height_arg  < 1) { throw (new Exception("Invalid tile height" )); }
+        if (sheet_width_arg  < 1) { throw (new Exception("Invalid sheet width" )); }
         if (sheet_height_arg < 1) { throw (new Exception("Invalid sheet height")); }
 
         this.tileWidth  = tile_width_arg;
@@ -75,8 +74,10 @@ public class TileSheet {
         this.y_spacing = y_spacing_arg;
 
         this.sheet = new Bitmap(fileName);
+        //this.sheet.MakeTransparent(Color.Magenta);  // I am seeing (very) messed up colors, but the result _is_ transparent on Magenta...
 
         // Check image dimensions against args:
+        // TODO: extract a method/property for calc_min_ww, calc_min_hh (rect_for_tile() is another caller)...
         int calc_min_ww = x_offset + (tileWidth  * width)  + (x_spacing * (width  - 1));  // Unused tiles/blank space on right  is OK
         int calc_min_hh = y_offset + (tileHeight * height) + (y_spacing * (height - 1));  // Unused tiles/blank space on bottom is OK
         if (sheet.Width < calc_min_ww) {
@@ -90,38 +91,39 @@ public class TileSheet {
             throw (new Exception(ex_string));
         }
 
-        this.tile_rects  = new TileSprite[num_tiles];
-        this.GL_textures = new int[num_tiles];
-
+        this.tile_rects = new StaticTileSprite[num_tiles];
         Load_GL_Textures_for_TileSheet();
 
         return;
     } // tileSheet()
 
     public TileSheet(string fileName, int tiles_across, int tiles_high) :
-        this(fileName,
-              tiles_across, tiles_high,
-              32, 32,  // 32x32 is the most common tile size
-              0, 0,    // zero X and Y offset (blank space on left/top of sheet)
-              0, 0     // zero X and Y spacing (between columns/rows)
-              ) {
-        /* empty method body for this overload */
+        this(fileName, tiles_across, tiles_high,
+             32, 32,  // 32x32 is the most common tile size
+             0, 0,    // zero X and Y offset (blank space on left/top of sheet)
+             0, 0     // zero X and Y spacing (between columns/rows)
+             ) {
+        // This overload has an empty method body
     } // TileSheet()
 
     public void Load_GL_Textures_for_TileSheet() {
+        int[] GL_textures = new int[num_tiles];
         GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
         GL.GenTextures(num_tiles, GL_textures);
         int xx, yy, ii;
         for (yy = 0; yy < this.height; yy++) {
             for (xx = 0; xx < this.width; xx++) {
                 ii = GridUtility.indexForXYW(xx, yy, this.width);
+
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.Blend);
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
                 GL.BindTexture(TextureTarget.Texture2D, GL_textures[ii]);
                 Rectangle  tile_rect = rect_for_tile(xx, yy);
                 BitmapData tile_data = sheet.LockBits(tile_rect,
                                                       ImageLockMode.ReadOnly,
                                                       System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
                 GL.TexImage2D(TextureTarget.Texture2D,
                               0,
                               PixelInternalFormat.Rgba,
@@ -132,50 +134,52 @@ public class TileSheet {
                               PixelType.UnsignedByte,
                               tile_data.Scan0);
                 sheet.UnlockBits(tile_data);
-                tile_rects[ii] = new TileSprite(this, GL_textures[ii], tile_rect);
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
+
+                tile_rects[ii] = new StaticTileSprite(this, GL_textures[ii], tile_rect);
             } // for(xx)
         } // for(yy)
     } // Load_GL_Textures_for_TileSheet()
 
-
-    public TileSprite this[int tile_index] {
+    public StaticTileSprite this[int tile_index] {
         get {
             if (tile_index < 0)        { return null; }
-            if (tile_index > maxIndex) { return null; }
+            if (tile_index > max_index) { return null; }
             return tile_rects[tile_index];
         }
     } // indexer[ii]
 
-    public TileSprite this[int column, int row] {
+    public StaticTileSprite this[int xx_column, int yy_row] {
         get {
-            int tile_index = GridUtility.indexForXYW(column, row, width);
+            int tile_index = GridUtility.indexForXYW(xx_column, yy_row, this.width);
             if (tile_index < 0)        { return null; }
-            if (tile_index > maxIndex) { return null; }
+            if (tile_index > max_index) { return null; }
             return tile_rects[tile_index];
         }
     } // indexer[column,row]
 
+    public Rectangle rect_for_tile(int ii) {
+        int xx = GridUtility.XforIW(ii, this.width);
+        int yy = GridUtility.YforIW(ii, this.width);
+        return rect_for_tile(xx, yy);
+    } // rect_for_tile(ii)
+
     public Rectangle rect_for_tile(int xx_column, int yy_row) {
+        // xx_column and yy_row are 0-based
         int       rect_xx = x_offset + (xx_column * tileWidth)  + (x_spacing * xx_column);
         int       rect_yy = y_offset + (yy_row    * tileHeight) + (y_spacing * yy_row);
         Rectangle rect    = new Rectangle(rect_xx, rect_yy, tileWidth, tileHeight);
         return rect;
     } // rect_for_tile(xx,yy)
-
-    public Rectangle rect_for_tile(int ii) {
-        int       xx      = GridUtility.XforIW(ii, this.width);
-        int       yy      = GridUtility.YforIW(ii, this.width);
-        int       rect_xx = x_offset + (xx * tileWidth)  + (x_spacing * xx);
-        int       rect_yy = y_offset + (yy * tileHeight) + (y_spacing * yy);
-        Rectangle rect    = new Rectangle(rect_xx, rect_yy, tileWidth, tileHeight);
-        return rect;
-    } // rect_for_tile(ii)
-
-    public int maxIndex {
+    
+    public int max_index {
         get {
             return (width * height) - 1;  // Zero-based, for array indexing and loops
         }
     }
+
     public int num_tiles {
         get {
             return (width * height);  // One-based, number of tiles for array allocations
@@ -186,48 +190,7 @@ public class TileSheet {
 
 
 
-public class TileSprite : ObjectRegistrar.IHaximaSerializeable {
-    public TileSheet tile_sheet { get; private set; }
-    public Image     image      { get { return tile_sheet.sheet; } }
-    public Rectangle rect       { get; private set; }
 
-    public int    ID  { get; private set; }
-    public string tag { get { return String.Format("{0}-{1}", ObjectRegistrar.Sprites.tag_prefix, ID); } }
-
-    public int texture { get; private set; }
-
-    public TileSprite(TileSheet tile_sheet, int OpenGL_texture_id, int xx, int yy, int ww, int hh) {
-        this.tile_sheet = tile_sheet;
-        this.texture    = OpenGL_texture_id;
-        this.rect       = new Rectangle(xx, yy, ww, hh);
-        this.ID         = ObjectRegistrar.Sprites.register_obj(this);
-    } // TileSprite(sh,tex,x,y,w,h)
-
-    public TileSprite(TileSheet tile_sheet, int OpenGL_texture_id, Rectangle rect) {
-        this.tile_sheet = tile_sheet;
-        this.texture    = OpenGL_texture_id;
-        this.rect       = rect;
-        this.ID         = ObjectRegistrar.Sprites.register_obj(this);
-    } // TileSprite(sh,tex,Rectangle)
-
-    // TODO: 
-    // Perhaps move square/hex tile drawing methods from TileViewPortControl into TileSprite ...
-    // Such methods would want an argument for the TVP (or other GLControl?) to draw them upon...
-    // For now, will make TileViewPortControl.Render() get the texture_id via (sprite_obj).texture ...
-
-    public void GDI_Draw_Tile(Graphics gg, int xx, int yy, ImageAttributes attrib) {
-        // Keeping this around, as it may prove convenient to be able 
-        // to draw a tile onto a Control for certain UI purposes.
-
-        // Draw the region this.rect of the image onto gg at xx,yy, with no scaling
-        Rectangle destRect = new Rectangle(xx, yy, rect.Width, rect.Height);
-        gg.DrawImage(image,
-                     new Rectangle(xx, yy, rect.Width, rect.Height),
-                     rect.X, rect.Y, rect.Width, rect.Height,
-                     GraphicsUnit.Pixel, attrib);
-    } // GDI_Draw_Tile()
-
-} // class TileSprite
 
 
 

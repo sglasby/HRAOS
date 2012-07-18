@@ -172,7 +172,7 @@ using System.Text;
                     new_grid = Rotate000(this);
                     break;
                 case 90:
-                    new_grid = Rotate090(this);
+                    new_grid = this.Rotate090();  // TODO: change Rotate 000, 180, 270 to match...
                     break;
                 case 180:
                     new_grid = Rotate180(this);
@@ -186,30 +186,30 @@ using System.Text;
             return new_grid;
         } // RotateResult()
 
-        private DenseGrid Rotate000(DenseGrid grid)
+        public DenseGrid Rotate000(DenseGrid grid)
         {
             DenseGrid new_grid = new DenseGrid(grid.width, grid.height, 0);
             DenseGrid.BlitFromAOntoB(grid, new_grid, 0, 0);
             return new_grid;
         } // Rotate000()
 
-        private DenseGrid Rotate090(DenseGrid grid)
+        public DenseGrid Rotate090()  // TODO: change Rotate 000, 180, 270 to match...
         {
-            DenseGrid new_grid = new DenseGrid(grid.height, grid.width, 0);
-            for (int yy = grid.min_y(); yy <= grid.max_y(); yy++)
+            DenseGrid new_grid = new DenseGrid(this.height, this.width, 0);
+            for (int yy = this.min_y(); yy <= this.max_y(); yy++)
             {
-                for (int xx = grid.min_x(); xx <= grid.max_x(); xx++)
+                for (int xx = this.min_x(); xx <= this.max_x(); xx++)
                 {
-                    int dest_x = grid.height - (yy + 1);
+                    int dest_x = this.height - (yy + 1);
                     int dest_y = xx;
-                    int value = grid.contents_at_XY(xx, yy);
+                    int value = this.contents_at_XY(xx, yy);
                     new_grid.set_contents_at_XY(dest_x, dest_y, value);
                 } // for(xx)
             } // for(yy)
             return new_grid;
         } // Rotate090()
 
-        private DenseGrid Rotate180(DenseGrid grid)
+        public DenseGrid Rotate180(DenseGrid grid)
         {
             DenseGrid new_grid = new DenseGrid(grid.width, grid.height, 0);
             for (int yy = grid.min_y(); yy <= grid.max_y(); yy++)
@@ -225,7 +225,7 @@ using System.Text;
             return new_grid;
         } // Rotate180()
 
-        private DenseGrid Rotate270(DenseGrid grid)
+        public DenseGrid Rotate270(DenseGrid grid)
         {
             DenseGrid new_grid = new DenseGrid(grid.height, grid.width, 0);
             for (int yy = grid.min_y(); yy <= grid.max_y(); yy++)
