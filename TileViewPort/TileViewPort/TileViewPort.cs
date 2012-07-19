@@ -113,8 +113,8 @@ public class TileViewPort
         x_origin     = map_xx;
         y_origin     = map_yy;
 
-        this.Width  = (width_tiles  * map.sheet.tileWidth);
-        this.Height = (height_tiles * map.sheet.tileHeight);
+        this.Width  = (width_tiles  * map.sheet.tile_wide_px);
+        this.Height = (height_tiles * map.sheet.tile_high_px);
 
         if (Width  > control.Width)  { throw new ArgumentException("TileViewPort() - tiles width  too large for control\n"); }
         if (Height > control.Height) { throw new ArgumentException("TileViewPort() - tiles height too large for control\n"); }
@@ -132,8 +132,8 @@ public class TileViewPort
         // Setting the control size to an even number of pixels greater than needed 
         // for the intended tile width*height will thus provide a thin border around the tile region.
         // TODO: Not working, see below...
-        int viewport_pixels_ww = width_tiles  * map.sheet.tileWidth;
-        int viewport_pixels_hh = height_tiles * map.sheet.tileHeight;
+        int viewport_pixels_ww = width_tiles  * map.sheet.tile_wide_px;
+        int viewport_pixels_hh = height_tiles * map.sheet.tile_high_px;
 
         int extra_ww = Math.Max(0, control.Width  - viewport_pixels_ww);
         int extra_hh = Math.Max(0, control.Height - viewport_pixels_hh);

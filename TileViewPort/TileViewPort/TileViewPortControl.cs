@@ -23,6 +23,7 @@ public class TileViewPortControl {
     const int YY_POS_MAX     = 17; // 18 == VIEW_HH / TILE_HH  so yy_pos can be 0..17
     const int TILE_WW        = 32;
     const int TILE_HH        = 32;
+
     const int SHEET_TILES_WW = 16;
     const int SHEET_TILES_HH = 16;
     const int NUM_TILES      = SHEET_TILES_WW * SHEET_TILES_HH;
@@ -63,8 +64,8 @@ public class TileViewPortControl {
             //throw new Exception("TileViewPortControl OnPaint() without owner");
         }
 
-        int tileWidth  = owner.map.sheet.tileWidth;
-        int tileHeight = owner.map.sheet.tileHeight;
+        int tileWidth  = owner.map.sheet.tile_wide_px;
+        int tileHeight = owner.map.sheet.tile_high_px;
 
         GL.ClearColor(Color.Green);  // Coordinates which are "off map" will remain this color
 
@@ -81,9 +82,12 @@ public class TileViewPortControl {
                                map_yy >= 0 &&
                                map_yy < owner.map.height);
 
+                // Aha!  Reason why "extra_width" etc is not working...pixel_xx and pixel_yy are unused!
+                // (Thats what you get, merging two similar demo sources together)
+                // blit_square_tile() currently takes TILE x,y position, but should rather take pixel_xx, pixel_yy
+                // so that this sort of pixel positioning can be decreed...
                 int pixel_xx = left_pad + (view_xx * tileWidth);
                 int pixel_yy = top_pad  + (view_yy * tileHeight);  
-                // TODO: GDI+ origin is top-left, OpenGL origin is bottom-left.  Therefore, currently map is flipped on Y axis...
 
                 if (on_map) {
                     foreach (int LL in MapLayers.MapRenderingOrder) {
@@ -92,10 +96,6 @@ public class TileViewPortControl {
                             this.blit_square_tile(view_xx, view_yy, sp.texture(frame), 0);
                         }
                     } // foreach(LL)
-                }
-                else {
-                    // Put down a background color on non-map areas of the TileViewPort:
-                    // GL.clear()  // The GL.ClearColor() call before the render loop should suffice...this else goes away?
                 }
 
                 // TODO: 
@@ -122,8 +122,8 @@ public class TileViewPortControl {
     } // was previously named TileViewPortControl.OnPaint(), and may become that again ...
 
     public void blit_square_tile(int xx_pos, int yy_pos, int texture_ID, int padding) {
-        xx_pos = clamp(0, XX_POS_MAX, xx_pos);
-        yy_pos = clamp(0, YY_POS_MAX, yy_pos);
+        xx_pos  = clamp(0, XX_POS_MAX, xx_pos);
+        yy_pos  = clamp(0, YY_POS_MAX, yy_pos);
         padding = clamp(0, 8, padding);
 
         double xx = xx_pos * (TILE_WW + padding);
@@ -142,11 +142,8 @@ public class TileViewPortControl {
         GL.Translate(HALF_TILE_WW + xx, (yy + HALF_TILE_HH), 0);
         GL.Rotate(angle, 0.0, 0.0, -1.0);
 
-        //GL.Enable(EnableCap.Blend);
-        //GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-        //GL.Color4(1f, 1f, 1f, 1f);  // alas no transparency...
-
         GL.BindTexture(TextureTarget.Texture2D, texture_ID);
+
         GL.Begin(BeginMode.Quads);
 
         GL.TexCoord2(0.0f, 1.0f);

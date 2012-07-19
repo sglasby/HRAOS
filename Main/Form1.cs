@@ -19,10 +19,12 @@ namespace OpenGLForm
         TileViewPortControl tvp_control;
         TileViewPort        tvp;
         SimpleMapV1         map;
+
         TileSheet           ts;
         TileSheet           ui_ts;
         TileSheet           f1234;
-        TileSheet           whirlpool_ts;
+        TileSheet           wp_ts;
+        TileSheet           LF;
 
         private Label label1;
  
@@ -89,22 +91,29 @@ namespace OpenGLForm
             // code has been moved here, in a method we set up to be called upon the 'Shown' event
             // (which is fired upon the first display of this Form).
 
-            // TODO:
-            // Code from the pre-merge TileViewPort demo which loads the "ui_ts" tilesheet 
-            // (marquee tiles for the ViewPortLayers tiles) should be added back in...
-            // Pre-requisite to that is refactoring the TileSprite class, and for the drawing code to use OpenGL texture IDs from TileSprite objects...
-            string filename = @"U4.B_enhanced-32x32.png";
-            ts = new TileSheet(filename, 16, 16);  // causes GL textures to be loaded, needs some GL setup prior...
+            ts    = new TileSheet(@"U4.B_enhanced-32x32.png", 16, 16);  // causes GL textures to be loaded, needs some GL setup prior...
+            f1234 = new TileSheet(@"example_all_facings.4_frames.intra_1.png", 4, 9, 32, 32, 1, 1, 1, 1);
+            ui_ts = new TileSheet(@"bright_marquee.frame_1.png", 4, 4);  // Sprite ID 272 is the reticle
+            wp_ts = new TileSheet(@"whirlpool_bright.png", 4, 1);
 
-            string f1234_filename = @"example_all_facings.4_frames.intra_1.png";
-            f1234 = new TileSheet(f1234_filename, 4, 9, 32, 32, 1, 1, 1, 1);
-
-            string ui_ts_filename = @"bright_marquee.frame_1.png";  // Sprite ID 272 is the reticle
-            ui_ts = new TileSheet(ui_ts_filename, 4, 4);
-
+            // TODO: 
+            // After setting up all these AnimTileSprite instances, the utility is clear for
+            // various constructor overloads which infer the wanted StaticTileSprite IDs...
             AnimTileSprite anim_blue_wiz = new AnimTileSprite(ts, ts[32], ts[33]);
             AnimTileSprite anim_red_wiz  = new AnimTileSprite(ts, ts[0,14], ts[1,14], ts[2,14], ts[3,14]);
+
+            // Counters for 3 frames (A,B,C) and for 4 frames (1,2,3,4)
+            // This illustrates why the master frame cycle need be the Least Common Multiple of (3,4) 
+            // (or whatever other set of ITileSprite.num_frames values).
+            AnimTileSprite count_ABC     = new AnimTileSprite(ts,    ts[0,6], ts[1,6], ts[2,6]);
             AnimTileSprite count_1234    = new AnimTileSprite(f1234, f1234[0,0], f1234[1,0], f1234[2,0], f1234[3,0]);
+
+            AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, wp_ts[0], wp_ts[1], wp_ts[2], wp_ts[3]);
+
+            LF = new TileSheet(@"lava.wave_down.speed_4.frames_8.png", 8, 1);  // LF == LavaFlow
+            AnimTileSprite lava_flow = new AnimTileSprite(LF, LF[0], LF[1], LF[2], LF[3], LF[4], LF[5], LF[6], LF[7]);
+
+            // TileSheet TW = new TileSheet(@"example_wave_test.intra_1.png", 1, 9);  // Will need WaveTileSprite to support this...
 
             int[] path_rect_5x4 = new int[]
             { // 5 = grass, 7 = trees, 58 = boulder
@@ -116,7 +125,7 @@ namespace OpenGLForm
 
             int lava_ID = ts[12,4].ID;  // Lava
             //DenseGrid map_16x64 = new DenseGrid(16, 64, lava_ID);
-            DenseGrid map_16x64 = new DenseGrid(16, 64, count_1234.ID);
+            DenseGrid map_16x64 = new DenseGrid(16, 64, lava_flow.ID);
 
             DenseGrid flip_none = new DenseGrid(5, 4, path_rect_5x4);  // Test with width != height, the better to see the rotations and flips
             DenseGrid flip_we   = flip_none.Flip_WE();
@@ -166,6 +175,10 @@ namespace OpenGLForm
             map.layers[MapLayers.Beings].set_contents_at_XY(2, 1, anim_blue_wiz.ID);  // Blue Wizard, animated (2 frames)
             map.layers[MapLayers.Beings].set_contents_at_XY(3, 3, anim_red_wiz.ID);   // Red  Wizard, animated (4 frames)
 
+            map.layers[MapLayers.Beings].set_contents_at_XY(4, 1, count_ABC.ID);   // 3 frames (A,B,C)
+            map.layers[MapLayers.Beings].set_contents_at_XY(5, 1, count_1234.ID);  // 4 frames (1,2,3,4)
+
+            map.layers[MapLayers.Beings].set_contents_at_XY(0, 0, whirlpool.ID);
 
             // Add some elements to the UI_elements layer of the TileViewPort:
             
@@ -305,9 +318,16 @@ namespace OpenGLForm
         int       idleCounter = 0;  // Counts number of Accumulate() calls since last tick
         int       num_ticks   = 0;
 
-        const int cycle_period = 3000;  // Number of milliseconds per cycle of animation frames
-        const int periodicity  = 4;
-        const int tick_time    = cycle_period / periodicity;  // N animation updates per 1000 milliseconds
+        const int cycle_period = 6000;  // Number of milliseconds per cycle of animation frames
+        const int periodicity  = 24;     // This should be the Least_Common_Multiple of all distinct (ITileSprite.num_frames) values
+        const int tick_time    = cycle_period / periodicity;  // M / N --> N animation updates per M milliseconds
+
+        // TODO: 
+        // Consider means of the master 'frame' being supplemented by per-object current_frame counters, for some objects.
+        // 
+        // This is because there are various interesting use cases for 
+        // multiple same-sprite/sequence objects which one would want animated not-in-sync,
+        // though we still desire for many _types_ of objects that they animate in sync.
 
         private void Accumulate(double milliseconds)
         {

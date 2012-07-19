@@ -15,28 +15,28 @@ public class TileSheet {
     // TODO: That will presumably occur once (Map API + OpenTK TileViewPort) are merged with (HRAOS)...
     // TODO: It may make sense for TileSheet to implement IGridIterable, once this is merged with HRAOS...
 
-    public string fileName { get; set; }
+    public string fileName  { get; set; }
 
-    public int width      { get; set; }  // 1..some_max, width  in tiles of the sheet
-    public int height     { get; set; }  // 1..some_max, height in tiles of the sheet
+    public int width_tiles  { get; set; }  // 1..some_max, width  in tiles of the sheet
+    public int height_tiles { get; set; }  // 1..some_max, height in tiles of the sheet
 
-    public int tileWidth  { get; set; }  // 1..some_max (commonly 32), width  in pixels of 1 tile
-    public int tileHeight { get; set; }  // 1..some_max (commonly 32), height in pixels of 1 tile
+    public int tile_wide_px { get; set; }  // 1..some_max (commonly 32), width  in pixels of 1 tile
+    public int tile_high_px { get; set; }  // 1..some_max (commonly 32), height in pixels of 1 tile
 
-    public int x_offset   { get; set; }  // 0..n (usually 0), num blank pixels on sheet left edge
-    public int y_offset   { get; set; }  // 0..n (usually 0), num blank pixels on sheet top edge
+    public int x_offset     { get; set; }  // 0..n (usually 0), num blank pixels on sheet left edge
+    public int y_offset     { get; set; }  // 0..n (usually 0), num blank pixels on sheet top edge
 
-    public int x_spacing  { get; set; }  // 0..n (usually 0), num blank pixels between columns
-    public int y_spacing  { get; set; }  // 0..n (usually 0), num blank pixels between rows
+    public int x_spacing    { get; set; }  // 0..n (usually 0), num blank pixels between columns
+    public int y_spacing    { get; set; }  // 0..n (usually 0), num blank pixels between rows
 
     public Bitmap sheet { get; private set; }
     StaticTileSprite[]  tile_rects;
 
     public TileSheet(string file_name_arg,
-                     int sheet_width_arg, int sheet_height_arg,
-                     int tile_width_arg,  int tile_height_arg,
-                     int x_offset_arg,    int y_offset_arg,
-                     int x_spacing_arg, int y_spacing_arg) {
+                     int sheet_width_arg,   int sheet_height_arg,
+                     int tile_width_px_arg, int tile_height_px_arg,
+                     int x_offset_arg,      int y_offset_arg,
+                     int x_spacing_arg,     int y_spacing_arg) {
         // Note: 
         // The TileSheet constructor makes OpenGL calls to load texture data,
         // and as such, needs to be called after the OpenGL system is initialized
@@ -58,28 +58,43 @@ public class TileSheet {
         this.fileName = file_name_arg;
 
         // Check sheet and tile dimension args:
-        if (tile_width_arg   < 1) { throw (new Exception("Invalid tile width"  )); }
-        if (tile_height_arg  < 1) { throw (new Exception("Invalid tile height" )); }
-        if (sheet_width_arg  < 1) { throw (new Exception("Invalid sheet width" )); }
-        if (sheet_height_arg < 1) { throw (new Exception("Invalid sheet height")); }
+        if (tile_width_px_arg  < 1) { throw (new Exception("Invalid tile width"  )); }
+        if (tile_height_px_arg < 1) { throw (new Exception("Invalid tile height" )); }
+        if (sheet_width_arg    < 1) { throw (new Exception("Invalid sheet width" )); }
+        if (sheet_height_arg   < 1) { throw (new Exception("Invalid sheet height")); }
 
-        this.tileWidth  = tile_width_arg;
-        this.tileHeight = tile_height_arg;
-        this.width      = sheet_width_arg;
-        this.height     = sheet_height_arg;
+        this.width_tiles  = sheet_width_arg;
+        this.height_tiles = sheet_height_arg;
+
+        this.tile_wide_px = tile_width_px_arg;
+        this.tile_high_px = tile_height_px_arg;
 
         this.x_offset  = x_offset_arg;
         this.y_offset  = y_offset_arg;
+
         this.x_spacing = x_spacing_arg;
         this.y_spacing = y_spacing_arg;
 
+        // Note:
+        // I spent an hour or so scratching my head when my first attempt at "wave" sprite tilesheet
+        // (of lava, 8 frames shifted down 4 pixels per frame) displayed very odd image data.
+        // The problem turned out to be that the image was a PNG with 24-bit color depth.
+        // 
+        // This suggests that there is a bug, or some other unknown-to-me behavior, 
+        // with the Bitmap constructor with regards to PNG with 24-bit color depth, 
+        // or with the OpenGL texture setup I have when used with such an image.
+        // So, beware such.
+        // 
+        // Hmmm...I wonder if such an issue is related to the strange results I see 
+        // when I attempt sheet.MakeTransparent(Color.Magenta) to get transparency via color-key, 
+        // as seen in _working_ OpenGL examples...
         this.sheet = new Bitmap(fileName);
         //this.sheet.MakeTransparent(Color.Magenta);  // I am seeing (very) messed up colors, but the result _is_ transparent on Magenta...
 
         // Check image dimensions against args:
         // TODO: extract a method/property for calc_min_ww, calc_min_hh (rect_for_tile() is another caller)...
-        int calc_min_ww = x_offset + (tileWidth  * width)  + (x_spacing * (width  - 1));  // Unused tiles/blank space on right  is OK
-        int calc_min_hh = y_offset + (tileHeight * height) + (y_spacing * (height - 1));  // Unused tiles/blank space on bottom is OK
+        int calc_min_ww = x_offset + (tile_wide_px  * width_tiles) + (x_spacing * (width_tiles  - 1));  // Unused tiles/blank space on right  is OK
+        int calc_min_hh = y_offset + (tile_high_px * height_tiles) + (y_spacing * (height_tiles - 1));  // Unused tiles/blank space on bottom is OK
         if (sheet.Width < calc_min_ww) {
             string ex_string = String.Format("TileSheet image '{0}' is size {1}x{2} pixels, args specify minimum width of {3} pixels.",
                     fileName, sheet.Width, sheet.Height, calc_min_ww);
@@ -111,9 +126,9 @@ public class TileSheet {
         GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
         GL.GenTextures(num_tiles, GL_textures);
         int xx, yy, ii;
-        for (yy = 0; yy < this.height; yy++) {
-            for (xx = 0; xx < this.width; xx++) {
-                ii = GridUtility.indexForXYW(xx, yy, this.width);
+        for (yy = 0; yy < this.height_tiles; yy++) {
+            for (xx = 0; xx < this.width_tiles; xx++) {
+                ii = GridUtility.indexForXYW(xx, yy, this.width_tiles);
 
                 GL.Enable(EnableCap.Texture2D);
                 GL.Enable(EnableCap.Blend);
@@ -145,7 +160,7 @@ public class TileSheet {
 
     public StaticTileSprite this[int tile_index] {
         get {
-            if (tile_index < 0)        { return null; }
+            if (tile_index < 0)         { return null; }
             if (tile_index > max_index) { return null; }
             return tile_rects[tile_index];
         }
@@ -153,36 +168,38 @@ public class TileSheet {
 
     public StaticTileSprite this[int xx_column, int yy_row] {
         get {
-            int tile_index = GridUtility.indexForXYW(xx_column, yy_row, this.width);
-            if (tile_index < 0)        { return null; }
-            if (tile_index > max_index) { return null; }
-            return tile_rects[tile_index];
+            int tile_index = GridUtility.indexForXYW(xx_column, yy_row, this.width_tiles);
+            return this[tile_index];
+
+            //if (tile_index < 0)         { return null; }
+            //if (tile_index > max_index) { return null; }
+            //return tile_rects[tile_index];
         }
     } // indexer[column,row]
 
     public Rectangle rect_for_tile(int ii) {
-        int xx = GridUtility.XforIW(ii, this.width);
-        int yy = GridUtility.YforIW(ii, this.width);
+        int xx = GridUtility.XforIW(ii, this.width_tiles);
+        int yy = GridUtility.YforIW(ii, this.width_tiles);
         return rect_for_tile(xx, yy);
     } // rect_for_tile(ii)
 
     public Rectangle rect_for_tile(int xx_column, int yy_row) {
         // xx_column and yy_row are 0-based
-        int       rect_xx = x_offset + (xx_column * tileWidth)  + (x_spacing * xx_column);
-        int       rect_yy = y_offset + (yy_row    * tileHeight) + (y_spacing * yy_row);
-        Rectangle rect    = new Rectangle(rect_xx, rect_yy, tileWidth, tileHeight);
+        int       rect_xx = x_offset + (xx_column * tile_wide_px)  + (x_spacing * xx_column);
+        int       rect_yy = y_offset + (yy_row    * tile_high_px) + (y_spacing * yy_row);
+        Rectangle rect    = new Rectangle(rect_xx, rect_yy, tile_wide_px, tile_high_px);
         return rect;
     } // rect_for_tile(xx,yy)
     
     public int max_index {
         get {
-            return (width * height) - 1;  // Zero-based, for array indexing and loops
+            return (width_tiles * height_tiles) - 1;  // Zero-based, for array indexing and loops
         }
     }
 
     public int num_tiles {
         get {
-            return (width * height);  // One-based, number of tiles for array allocations
+            return (width_tiles * height_tiles);  // One-based, number of tiles for array allocations
         }
     }
 

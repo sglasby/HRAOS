@@ -21,8 +21,8 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
 
     public TileSheet tile_sheet(int frame) { return _tile_sheet; }
     public Image     image     (int frame) { return _image;      }
-    public Rectangle rect      (int frame) { int ff=frame % num_frames; return frame_sequence[ff].rect(ff);    }
-    public int       texture   (int frame) { int ff=frame % num_frames; return frame_sequence[ff].texture(ff); }
+    public Rectangle rect      (int frame) { int ff = frame % num_frames; return frame_sequence[ff].rect(ff);    }
+    public int       texture   (int frame) { int ff = frame % num_frames; return frame_sequence[ff].texture(ff); }
 
     
     public AnimTileSprite(TileSheet tile_sheet, params StaticTileSprite[] anim_frames) {
