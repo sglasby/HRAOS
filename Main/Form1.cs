@@ -25,7 +25,7 @@ namespace OpenGLForm
         TileSheet           f1234;
         TileSheet           wp_ts;
         TileSheet           LF;
-
+ 
         private Label label1;
  
         public Form1() {
@@ -94,6 +94,7 @@ namespace OpenGLForm
             ts    = new TileSheet(@"U4.B_enhanced-32x32.png", 16, 16);  // causes GL textures to be loaded, needs some GL setup prior...
             f1234 = new TileSheet(@"example_all_facings.4_frames.intra_1.png", 4, 9, 32, 32, 1, 1, 1, 1);
             ui_ts = new TileSheet(@"bright_marquee.frame_1.png", 4, 4);  // Sprite ID 272 is the reticle
+            //ui_ts = new TileSheet(@"bright_marquee.frame_1.alpha.png", 4, 4);  // Hmmm...not quite right...
             wp_ts = new TileSheet(@"whirlpool_bright.png", 4, 1);
 
             // TODO: 

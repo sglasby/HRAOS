@@ -57,6 +57,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bright_marquee.frame_1.alpha.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="bright_marquee.frame_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

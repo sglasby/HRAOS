@@ -3,13 +3,6 @@ using System.Drawing;
 
 using OpenTK.Graphics.OpenGL;
 
-public enum TilingModes {
-    None = 0,
-    Square,
-    Hex_NS,
-    Hex_WE
-}
-
 public class TileViewPortControl {
     // A TileViewPort "has a" TileViewPortControl,
     // and draws within that control, being constrained 
@@ -86,6 +79,8 @@ public class TileViewPortControl {
                 // (Thats what you get, merging two similar demo sources together)
                 // blit_square_tile() currently takes TILE x,y position, but should rather take pixel_xx, pixel_yy
                 // so that this sort of pixel positioning can be decreed...
+                // ... or perhaps it would be better for blit_square_tile() to have args for the desired pixel offset x,y,
+                //     and this.left_pad and this.top_pad to be properties of the TVPC object?
                 int pixel_xx = left_pad + (view_xx * tileWidth);
                 int pixel_yy = top_pad  + (view_yy * tileHeight);  
 
@@ -122,9 +117,9 @@ public class TileViewPortControl {
     } // was previously named TileViewPortControl.OnPaint(), and may become that again ...
 
     public void blit_square_tile(int xx_pos, int yy_pos, int texture_ID, int padding) {
-        xx_pos  = clamp(0, XX_POS_MAX, xx_pos);
-        yy_pos  = clamp(0, YY_POS_MAX, yy_pos);
-        padding = clamp(0, 8, padding);
+        xx_pos  = Utility.clamp(0, XX_POS_MAX, xx_pos);
+        yy_pos  = Utility.clamp(0, YY_POS_MAX, yy_pos);
+        padding = Utility.clamp(0, 8, padding);
 
         double xx = xx_pos * (TILE_WW + padding);
         double yy = yy_pos * (TILE_HH + padding);
@@ -161,14 +156,7 @@ public class TileViewPortControl {
 
     } // blit_square_tile()
 
-    int clamp(int min, int max, int value) {
-        // TODO: Various versions of this exist, such as GridUtility.Clamp(), should be unified...
-        if (value < min)
-            return min;
-        if (value > max)
-            return max;
-        return value;
-    }
+
 
 
     [BrowsableAttribute(false)]
