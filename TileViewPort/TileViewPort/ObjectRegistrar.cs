@@ -7,7 +7,6 @@ public class ObjectRegistrar {
     // The global registrars:
     public static ObjectRegistrar HaxObjs;
     public static ObjectRegistrar Sprites;
-    //public static ObjectRegistrar AnimSprites;
 
     Type registered_type;
     public  string tag_prefix { get; private set; }
@@ -20,14 +19,12 @@ public class ObjectRegistrar {
         // Static class constructor:
         HaxObjs = new ObjectRegistrar(typeof(Object), "Obj");
         Sprites = new ObjectRegistrar(typeof(ITileSprite), "Spr");
-        //Sprites     = new ObjectRegistrar(typeof(StaticTileSprite), "Spr");  // original
-        //AnimSprites = new ObjectRegistrar(typeof(AnimTileSprite),   "AnSpr");  // distinct ObjRegistrar thwarted tile rendering...
     } // Initialize()
 
     public ObjectRegistrar(Type type_arg, string prefix_arg) {
         registered_type = type_arg;
         tag_prefix = prefix_arg;
-        num_objs = 0;
+        num_objs   = 0;
         highest_ID = 0;
         objs_by_ID = new Dictionary<int, object>();
         IDs_by_obj = new Dictionary<object, int>();
@@ -102,7 +99,7 @@ public class ObjectRegistrar {
         // Which style is more proper for an interface???
         //int    ID();   // A positive integer, 0 is special non-valid value
         //string tag();  // Of the form "prefix-ID", such as "SPR-12345"
-        int ID { get; }
+        int    ID  { get; }
         string tag { get; }
     } // interface IHaximaSerializeable
 

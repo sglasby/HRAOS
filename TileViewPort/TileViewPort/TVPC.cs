@@ -5,7 +5,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 
-class TVPC : OpenTK.GLControl {
+public class TVPC : OpenTK.GLControl {
 
     public TilingModes tiling_mode;
 
@@ -19,42 +19,50 @@ class TVPC : OpenTK.GLControl {
     public int tile_width_px;   // Width  to render a single tile, in pixels
     public int tile_height_px;  // Height to render a single tile, in pixels
 
-    private int? Width_in_tiles;   // Cached calculation, change upon resize
-    private int? Height_in_tiles;  //Cached calculation, change upon resize
+    //private int? Width_in_tiles;   // Cached calculation, change upon resize
+    //private int? Height_in_tiles;  // Cached calculation, change upon resize
     public int width_in_tiles {
         get {
-            if (Width_in_tiles != null) { return (int) Width_in_tiles; }
-            // If this.Width does not divide evenly, we add an extra tile (integer division rounds down)
-            int non_integral_width_tile = (this.Width % this.tile_width_px != 0) ? 1 : 0;
-            int ww = (this.Width / this.tile_width_px);
-            // Depending on partial-tile-scroll position,
-            // the TileViewPort may need to render (ww + non_integral_width_tile), 
-            // plus an extra columns of tiles along the left and right:
-            Width_in_tiles =  (ww + non_integral_width_tile + 2);
-            return (int) Width_in_tiles;
+            return (this.Width / this.tile_width_px);
+
+            //if (Width_in_tiles != null) { return (int) Width_in_tiles; }
+            //// If this.Width does not divide evenly, we add an extra tile (integer division rounds down)
+            //int non_integral_width_tile = (this.Width % this.tile_width_px != 0) ? 1 : 0;
+            //int ww = (this.Width / this.tile_width_px);
+            //// Depending on partial-tile-scroll position,
+            //// the TileViewPort may need to render (ww + non_integral_width_tile), 
+            //// plus an extra columns of tiles along the left and right:
+            //Width_in_tiles = (ww + non_integral_width_tile + 2);
+            //return (int) Width_in_tiles;
         }
     }
     public int height_in_tiles {
         get {
-            if (Height_in_tiles != null) { return (int) Height_in_tiles; }
-            // If this.Height does not divide evenly, we add an extra tile (integer division rounds down)
-            int non_integral_height_tile = (this.Height % this.tile_height_px != 0) ? 1 : 0;
-            int hh = (this.Height / this.tile_height_px);
-            // Depending on partial-tile-scroll position,
-            // the TileViewPort may need to render (hh + non_integral_height_tile), 
-            // plus an extra row of tiles along the top and bottom:
-            Height_in_tiles = (hh + non_integral_height_tile + 2);
-            return (int) Height_in_tiles;
+            return (this.Width / this.tile_height_px);
+
+            //if (Height_in_tiles != null) { return (int) Height_in_tiles; }
+            //// If this.Height does not divide evenly, we add an extra tile (integer division rounds down)
+            //int non_integral_height_tile = (this.Height % this.tile_height_px != 0) ? 1 : 0;
+            //int hh = (this.Height / this.tile_height_px);
+            //// Depending on partial-tile-scroll position,
+            //// the TileViewPort may need to render (hh + non_integral_height_tile), 
+            //// plus an extra row of tiles along the top and bottom:
+            //Height_in_tiles = (hh + non_integral_height_tile + 2);
+            //return (int) Height_in_tiles;
         }
     }
 
     private void allocate_layers() {
         this.layers = new IGridIterable[ViewPortLayers.COUNT];
         this.layers[ViewPortLayers.UI_Elements] = new DenseGrid(width_in_tiles, height_in_tiles, 0);
-        Width_in_tiles  = null;  // Force re-calculation upon next access
-        Height_in_tiles = null;  // Force re-calculation upon next access
+        //Width_in_tiles  = null;  // Force re-calculation upon next access
+        //Height_in_tiles = null;  // Force re-calculation upon next access
     }
 
+    // TODO: 
+    // Verify whether this.OnResize() will get called (since response to the Resize event is inherited),
+    // or whether it is needful to explicitly set it up, via a call like
+    // this.Resize += new System.Windows.Forms.PaintEventHandler(this.OnResize);
     void OnResize(object sender, EventArgs ee) {
         allocate_layers();
     }
@@ -69,16 +77,19 @@ class TVPC : OpenTK.GLControl {
     private int X_origin;
     private int Y_origin;
     public int x_origin {
-                get { return X_origin; }
-        private set { X_origin = GridUtility.Clamp(value, min_x_offset, max_x_offset); }
+         get { return X_origin; }
+         set { X_origin = GridUtility.Clamp(value, min_x_offset, max_x_offset); }
     }
     public int y_origin {
-                get { return Y_origin; }
-        private set { Y_origin = GridUtility.Clamp(value, min_y_offset, max_y_offset); }
+         get { return Y_origin; }
+         set { Y_origin = GridUtility.Clamp(value, min_y_offset, max_y_offset); }
     }
 
     public int center_x { get { return (width_in_tiles  / 2); } }
     public int center_y { get { return (height_in_tiles / 2); } }
+
+    public int max_x { get { return width_in_tiles  - 1; } }
+    public int max_y { get { return height_in_tiles - 1; } }
 
     public int min_x_offset {
         get {
@@ -140,32 +151,42 @@ class TVPC : OpenTK.GLControl {
 
     public TVPC(int control_width_px_arg, int control_height_px_arg,
                 int tile_width_px_arg,    int tile_height_px_arg,
-                ScrollConstraint constraint_arg,
-                SimpleMapV1 map_arg, int map_xx, int map_yy) {
+                ScrollConstraint constraint_arg) {
+        // Order of setup of things in the parent form (form1) 
+        // makes it needful that the (map, x, y) get set AFTER the constructor.
+        // As such, the constructor creates a TVPC with map,x,y (null,0,0)
+        // and later on, set_origin() or set_center() will set those, and call allocate_layers()
         // 
         if (control_width_px_arg  < 1) { throw new ArgumentException("Got zero width for TVP control");  }
         if (control_height_px_arg < 1) { throw new ArgumentException("Got zero height for TVP control"); }
         if (tile_width_px_arg  < 1)    { throw new ArgumentException("Got zero tile_width_px_arg");  }
         if (tile_height_px_arg < 1)    { throw new ArgumentException("Got zero tile_height_px_arg"); }
-        if (map_arg == null)           { throw new ArgumentException("Got null map_arg"); }
+
         this.Width  = control_width_px_arg;
         this.Height = control_height_px_arg;
-        allocate_layers();
 
         this.tile_width_px  = tile_width_px_arg;
         this.tile_height_px = tile_height_px_arg;
 
-        set_origin(map_arg, map_xx, map_yy);
         this.scroll_constraint = constraint_arg;
         this.tiling_mode       = TilingModes.Square;
+
         this.tile_grid_offset_x_px = 0;
         this.tile_grid_offset_y_px = 0;
-
     } // TVPC()
 
     // possibly other constructors, specifying control.Width, control.Height, etc...
 
     //private void setControlEdgeCentering() { /*...*/ }  // Taking a different approach to this functionality...
+    // 
+    // It would only be desirable for there to be centering/padding 
+    // of the tile grid with a non-integral-tiles this.Size
+    // if a mode "this.render_only_integral_tiles" existed, and was in effect.
+    // 
+    // Otherwise, the entire size of (this) will be used for rendering tile contents
+    // (including partial tiles along any/all edges),
+    // and this.tile_grid_offset_(x|y)_px will be used for partial-tile offset 
+    // of the tile grid relative to the control origin (0,0)
 
     public object contents_at_LXY(int layer, int xx, int yy) {
         if (layer < MapLayers.MIN) { return null; }
@@ -201,14 +222,21 @@ class TVPC : OpenTK.GLControl {
         // Set the map and the origin coordinates of the viewport
         // such that the viewport origin (top-left tile, for square grid)
         // is the tile with the specified coordinates.
-        if (map_arg == null) { throw new ArgumentException("Got null map_arg"); }
 
+        if (map_arg == null) {
+            this.map      = null;
+            this.x_origin = 0;
+            this.y_origin = 0;
+            return false;
+            //throw new ArgumentException("Got null map_arg");
+        }
         int xx = Utility.clamp(0, map_arg.width,  map_xx);
         int yy = Utility.clamp(0, map_arg.height, map_yy);
 
         this.map = map_arg;
         this.x_origin = xx;
         this.y_origin = yy;
+        allocate_layers();
 
         if ((map_xx != xx) || (map_yy != yy)) { return false; }
         return true;  // The specified coordinates were set, without adjustment
@@ -220,17 +248,18 @@ class TVPC : OpenTK.GLControl {
         // or as close as can be managed, given scrolling constraints.
         if (map_arg == null) { throw new ArgumentException("Got null map_arg"); }
 
-        int xx_c = map_arg.width  - this.center_x;
-        int yy_c = map_arg.height - this.center_y;
+        int xx = Utility.clamp(0, map_arg.width,  map_xx);
+        int yy = Utility.clamp(0, map_arg.height, map_yy);
 
-        int xx = Utility.clamp(0, map_arg.width  - this.center_x, map_xx);
-        int yy = Utility.clamp(0, map_arg.height - this.center_y, map_yy);
-
-        this.map = map_arg;
-        this.x_origin = xx;
-        this.y_origin = yy;
-
-        if ((xx_c != xx) || (yy_c != yy)) { return false; }
+        this.map      = map_arg;
+        this.x_origin = xx - center_x;
+        this.y_origin = yy - center_y;
+        allocate_layers();
+        // The resulting coordinates may differ from those specified by args,
+        // either due to out-of-map-bounds coordinates which were clamp()ed,
+        // or due to the scroll_constraint.  If so, return false.
+        if (this.x_origin != map_xx - center_x) { return false; }
+        if (this.y_origin != map_yy - center_y) { return false; }
         return true;  // The specified coordinates were set, without adjustment
     } // set_center()
 
@@ -249,8 +278,9 @@ class TVPC : OpenTK.GLControl {
                                (map_xx < this.map.width) &&
                                (map_yy >= 0) &&
                                (map_yy < this.map.height));
-                if (!on_map) { continue; }
+                if (!on_map) { goto RENDER_VIEWPORT_TILES; }
 
+                RENDER_MAP_TILES:
                 int pixel_xx = (view_xx * tile_width_px)  + tile_grid_offset_x_px;
                 int pixel_yy = (view_yy * tile_height_px) + tile_grid_offset_y_px;
 
@@ -262,6 +292,7 @@ class TVPC : OpenTK.GLControl {
                     }
                 } // foreach(LL)
 
+                RENDER_VIEWPORT_TILES:
                 // Second, render sprites on VIEWPORT layers:
                 foreach (int LL in ViewPortLayers.ViewPortRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.contents_at_LXY(LL, view_xx, view_yy);

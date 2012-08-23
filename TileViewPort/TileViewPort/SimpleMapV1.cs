@@ -93,7 +93,7 @@ public class SimpleMapV1
 
     public void AddTerrainRegion(DenseGrid RR, int xx, int yy)
     {
-        MapCompositedLayer canvas = (MapCompositedLayer)layers[MapLayers.Terrain];
+        MapCompositedLayer canvas = (MapCompositedLayer) layers[MapLayers.Terrain];
         canvas.AddContentRegion(RR, xx, yy);
     }
 

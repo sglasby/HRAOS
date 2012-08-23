@@ -12,37 +12,28 @@ namespace OpenGLForm
     // TODO: A better name for this Form would be a good thing...
     public partial class Form1 : Form
     {
-        bool      loaded;
-        Stopwatch sw = new Stopwatch(); // available to all event handlers
+        bool        loaded;
+        Stopwatch   sw = new Stopwatch(); // available to all event handlers
 
-        private GLControl   glControl1;  // TODO: This goes away once TileViewPortControl _isa_ GLControl...
-        TileViewPortControl tvp_control;
-        TileViewPort        tvp;
-        SimpleMapV1         map;
+        TileSheet   ts;
+        TileSheet   ui_ts;
+        TileSheet   f1234;
+        TileSheet   wp_ts;
+        TileSheet   LF;
 
-        TileSheet           ts;
-        TileSheet           ui_ts;
-        TileSheet           f1234;
-        TileSheet           wp_ts;
-        TileSheet           LF;
+        SimpleMapV1 map;
+        TVPC        tvpc;
+
  
         private Label label1;
  
         public Form1() {
-            // Set up glControl1, label1, etc before calling this.Controls.Add()
-
-            this.glControl1 = new GLControl();
-            this.glControl1.BackColor = System.Drawing.Color.Black;
-            this.glControl1.Location  = new System.Drawing.Point(10, 10);
-            this.glControl1.Size      = new System.Drawing.Size(512, 512);
-            this.glControl1.TabIndex  = 0;
-            //this.glControl1.Load     += new System.EventHandler(this.glControl1_Load);
-            this.glControl1.Paint    += new System.Windows.Forms.PaintEventHandler(this.glControl1_Paint);
-
-            tvp_control = new TileViewPortControl(glControl1);
-            //tvp_control.BackColor = System.Drawing.SystemColors.ControlDark;
-            //tvp_control.Location  = new System.Drawing.Point(0, 0);
-            //tvp_control.Size      = new System.Drawing.Size(729, 764);
+            this.tvpc = new TVPC(512, 512, 32, 32, ScrollConstraint.CenterTile);
+            this.tvpc.Location = new Point(10, 10);
+            // this.tvpc.Anchor = AnchorStyles.Left | AnchorStyles.Right;  // This caused tvpc to be displaced _downwards_ also -- why?
+            this.tvpc.TabIndex  = 0;
+            //this.tvpc.Load     += new System.EventHandler(this.tvpc_Load);
+            this.tvpc.Paint    += new System.Windows.Forms.PaintEventHandler(this.glControl1_Paint);
 
             this.label1 = new Label();
             this.label1.BackColor = SystemColors.ControlDark;
@@ -51,22 +42,22 @@ namespace OpenGLForm
             this.label1.TabIndex  = 1;
             // label1.Text Is set later in Accumulate()
 
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.tvpc);
+
             //this.Size = new Size(800, 600);  // Perhaps more convenient to set ClientSize 
             this.ClientSize = new System.Drawing.Size(800, 600);  // Results in .Size of (808 x 634) with titlebar, window borders, etc
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.glControl1);
             this.Text   = "Main Window Title";
             this.Load  += this.glControl1_Load;
             this.Shown += this.OnShown;  // Will execute once, AFTER Load and Activate events
             // Note: The order of (Load, Activated, Shown) can be altered, if a MessageBox() is invoked, therefore: do not use MessageBox()
             this.Paint += this.OnPaint;  // Using this to test TileSprite.GDI_Draw_Tile()
 
-            // TODO: Figure out whether we want key-handling attached to the Form or to a Control in the form 
-            // (currently it is attached to glControl1, via glControl1_Load() setting this.glControl1.KeyUp += OnKeyPress)
-
             Application.Idle += Application_Idle;
             sw.Start(); // start the Stopwatch, which is used to alter the label1.Text via Accumulate() and Animate()
-            this.glControl1.KeyDown += new KeyEventHandler(OnKeyDown);  // Handling KeyDown lets us get key repeat.
+            this.KeyPreview = true;
+            this.KeyDown += new KeyEventHandler(OnKeyDown);
+            // TODO: still need to set up PreviewKeyDown event handling, to allow arrow keys to work...
             // TODO: See notes in OnKeyDown()
 
         } // Form1()
@@ -125,8 +116,8 @@ namespace OpenGLForm
             };
 
             int lava_ID = ts[12,4].ID;  // Lava
-            //DenseGrid map_16x64 = new DenseGrid(16, 64, lava_ID);
-            DenseGrid map_16x64 = new DenseGrid(16, 64, lava_flow.ID);
+            //DenseGrid map_16x64 = new DenseGrid(16, 64, lava_ID);  // StaticTileSprite lava
+            DenseGrid map_16x64 = new DenseGrid(16, 64, lava_flow.ID);  // AnimTileSprite flowing lava
 
             DenseGrid flip_none = new DenseGrid(5, 4, path_rect_5x4);  // Test with width != height, the better to see the rotations and flips
             DenseGrid flip_we   = flip_none.Flip_WE();
@@ -151,16 +142,16 @@ namespace OpenGLForm
             map = new SimpleMapV1(16, 64, ts);
             map.AddTerrainRegion(map_16x64, 0, 0);
 
-            tvp = new TileViewPort(this.tvp_control,
-                15, 15,
-                //ViewPortScrollingConstraint.EntireMap,
-                ScrollConstraint.CenterTile,
-                //ViewPortScrollingConstraint.EdgeCorner, 
-                map, 0, 0);
-            tvp.set_center(map, 2, 2);
+            //tvp = new TileViewPort(this.tvp_control,
+            //    15, 15,
+            //    //ViewPortScrollingConstraint.EntireMap,
+            //    ScrollConstraint.CenterTile,
+            //    //ViewPortScrollingConstraint.EdgeCorner, 
+            //    map, 0, 0);
+            tvpc.scroll_constraint = ScrollConstraint.CenterTile;
+            tvpc.set_center(map, 2, 2);
 
             // Add some elements to the Beings layer of the Map:  // TODO: Still using hard-coded Sprite ID values here...
-//          map.layers[MapLayers.Beings].set_contents_at_XY(2, 1, 33);  // Wizard
             map.layers[MapLayers.Beings].set_contents_at_XY(8, 7, 21);  // Horse
 
             map.layers[MapLayers.Beings].set_contents_at_XY(8, 7, 21);  // Horse
@@ -184,14 +175,15 @@ namespace OpenGLForm
             // Add some elements to the UI_elements layer of the TileViewPort:
             
             int reticle = ui_ts[3, 3].ID;  // avoiding hard-coding Sprite ID 272
-            tvp.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvp.center_x(),      tvp.center_y(),       reticle);  // Center
-            tvp.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,                   0,                    reticle);  // NW
-            tvp.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvp.width_tiles - 1, 0,                    reticle);  // NE
-            tvp.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,                   tvp.height_tiles - 1, reticle);  // SW
-            tvp.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvp.width_tiles - 1, tvp.height_tiles - 1, reticle);  // SE
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             reticle);  // NE
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             tvpc.max_y,    reticle);  // SW
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    tvpc.max_y,    reticle);  // SE
 
         } // OnShown()
 
+        // Hmmm...all methods named "glControl1_*" belong in TVPC...
         private void glControl1_Load(object sender, EventArgs e)
         {
             SetupViewport();
@@ -211,8 +203,8 @@ namespace OpenGLForm
         private void SetupViewport() {
             // This exists here, in part because there are two callers:  glControl1_Load() and glControl1_Resize()
             // TODO: This code may belong in TileViewPortControl (when it isa GLControl)
-            int width  = glControl1.Width;
-            int height = glControl1.Height;
+            int width  = tvpc.Width;
+            int height = tvpc.Height;
             GL.MatrixMode(MatrixMode.Projection);  // Why MatrixMode.Projection here, and .Modelview in glControl1_Paint() ?
             GL.LoadIdentity();
             GL.Ortho(0, width, height, 0, 0, 1); // OpenGL origin coordinate (0,0) is at bottom left; we want origin at top left
@@ -236,6 +228,9 @@ namespace OpenGLForm
             //       setting e.IsInputKey = true for the wanted keys. 
             //       http://msdn.microsoft.com/en-us/library/system.windows.forms.control.previewkeydown.aspx
             //
+            // (Fairly sure now, that at least _most_ key handling should be in the main form;
+            // however, there might be some contexts where control-centric key handling is wanted in addition.)
+            //
             // At this point, I am not certain whether we will want to do key handling
             // exclusively in the form, or in (various) controls as well -- this
             // depends on how the UI is to be structured, and some controls I am planning
@@ -246,63 +241,63 @@ namespace OpenGLForm
 
             // TODO:
             // Currently, the ARROW keys are ignored (due to the above)
-            // Also, keypad handling does not work with NUMLOCK off, since the nupad keys then produce ARROW key events and such.
+            // Also, keypad handling does not work with NUMLOCK off, since the numpad keys then produce ARROW key events and such.
             // 
             // On the other hand, key repeat works now, and the scrolling speed is excellent!
 
             if (ee.KeyCode == Keys.Down ||
                 ee.KeyCode == Keys.NumPad2)
             { // South
-                tvp.y_origin++;
-                tvp.Invalidate();
+                tvpc.y_origin++;
+                tvpc.Invalidate();
             }
             if (ee.KeyCode == Keys.Up ||
                 ee.KeyCode == Keys.NumPad8)
             { // North
-                tvp.y_origin--;
-                tvp.Invalidate();
+                tvpc.y_origin--;
+                tvpc.Invalidate();
             }
             if (ee.KeyCode == Keys.Left ||
                 ee.KeyCode == Keys.NumPad4)
             { // West
-                tvp.x_origin--;
-                tvp.Invalidate();
+                tvpc.x_origin--;
+                tvpc.Invalidate();
             }
             if (ee.KeyCode == Keys.Right ||
                 ee.KeyCode == Keys.NumPad6)
             { // East
-                tvp.x_origin++;
-                tvp.Invalidate();
+                tvpc.x_origin++;
+                tvpc.Invalidate();
             }
 
             // Diagonal Directions:
             if (ee.KeyCode == Keys.Home ||
                 ee.KeyCode == Keys.NumPad7)
             { // NorthWest
-                tvp.y_origin--;
-                tvp.x_origin--;
-                tvp.Invalidate();
+                tvpc.y_origin--;
+                tvpc.x_origin--;
+                tvpc.Invalidate();
             }
             if (ee.KeyCode == Keys.PageUp ||
                 ee.KeyCode == Keys.NumPad9)
             { // NorthEast
-                tvp.y_origin--;
-                tvp.x_origin++;
-                tvp.Invalidate();
+                tvpc.y_origin--;
+                tvpc.x_origin++;
+                tvpc.Invalidate();
             }
             if (ee.KeyCode == Keys.End ||
                 ee.KeyCode == Keys.NumPad1)
             { // SouthWest
-                tvp.y_origin++;
-                tvp.x_origin--;
-                tvp.Invalidate();
+                tvpc.y_origin++;
+                tvpc.x_origin--;
+                tvpc.Invalidate();
             }
             if (ee.KeyCode == Keys.PageDown ||
                 ee.KeyCode == Keys.NumPad3)
             { // SouthEast
-                tvp.y_origin++;
-                tvp.x_origin++;
-                tvp.Invalidate();
+                tvpc.y_origin++;
+                tvpc.x_origin++;
+                tvpc.Invalidate();
             }
 
         } // OnKeyDown()
@@ -311,7 +306,7 @@ namespace OpenGLForm
         {
             double milliseconds = ComputeTimeSlice();
             Accumulate(milliseconds);
-            glControl1.Invalidate();
+            tvpc.Invalidate();
         }
 
         int       frame       = 0;  // Current animation frame.  This concept may end up per-TileViewPort, or even per-ITileSprite...need to experiment...
@@ -354,7 +349,7 @@ namespace OpenGLForm
             return timeslice;
         }
 
-
+        // Hmmm...all methods named "glControl1_*" belong in TVPC...
         private void glControl1_Paint(object sender, PaintEventArgs e)
         {
             if (!loaded)
@@ -364,17 +359,17 @@ namespace OpenGLForm
 
             GL.MatrixMode(MatrixMode.Modelview);    // Why MatrixMode.Modelview here, and .Projection in SetupViewport() ?
             GL.LoadIdentity();
-            tvp_control.Render(frame);
+            tvpc.Render(frame);
 
             GL.Flush();
-            glControl1.SwapBuffers();
+            tvpc.SwapBuffers();
         } // glControl1_Paint()
 
         private void glControl1_Resize(object sender, EventArgs e)
         {
             // Hmmm...when exactly does the GLControl get resized?
             SetupViewport();
-            glControl1.Invalidate();
+            tvpc.Invalidate();
         }
 
         private void OnPaint(object sender, PaintEventArgs ee) {

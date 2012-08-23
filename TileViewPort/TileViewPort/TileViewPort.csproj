@@ -50,8 +50,6 @@
     <Compile Include="Rect.cs" />
     <Compile Include="SimpleMapV1.cs" />
     <Compile Include="TileSheet.cs" />
-    <Compile Include="TileViewPort.cs" />
-    <Compile Include="TileViewPortControl.cs" />
     <Compile Include="TilingModes.cs" />
     <Compile Include="TVPC.cs">
       <SubType>UserControl</SubType>
