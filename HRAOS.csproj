@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{19FDFAC8-4414-464B-B7F6-3AFC98F17A9B}</ProjectGuid>
+    <ProjectGuid>{AB715038-27A8-4485-A412-26A3D5659331}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Main</RootNamespace>
-    <AssemblyName>Main</AssemblyName>
+    <RootNamespace>HRAOS</RootNamespace>
+    <AssemblyName>HRAOS</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -37,56 +37,71 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Content Include="Main\bright_marquee.frame_1.alpha.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\bright_marquee.frame_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\bright_marquee.frame_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\bright_marquee.frame_3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\bright_marquee.frame_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\example_all_facings.4_frames.intra_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\example_wave_test.intra_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\lava.wave_down.speed_4.frames_8.bars.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\lava.wave_down.speed_4.frames_8.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\U4.B_enhanced-32x32.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\whirlpool_bright.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Main\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="Main\Program.cs" />
+    <Compile Include="TileViewPort\AnimTileSprite.cs" />
+    <Compile Include="TileViewPort\HaxObj.cs" />
+    <Compile Include="TileViewPort\ITileSprite.cs" />
+    <Compile Include="TileViewPort\MapCompositedLayer.cs" />
+    <Compile Include="TileViewPort\MapDenseBitLayer.cs" />
+    <Compile Include="TileViewPort\MapDenseGridLayer.cs" />
+    <Compile Include="TileViewPort\MapSparseGridLayer.cs" />
+    <Compile Include="TileViewPort\ObjectRegistrar.cs" />
+    <Compile Include="TileViewPort\Rect.cs" />
+    <Compile Include="TileViewPort\SimpleMapV1.cs" />
+    <Compile Include="TileViewPort\StaticTileSprite.cs" />
+    <Compile Include="TileViewPort\TileSheet.cs" />
+    <Compile Include="TileViewPort\TilingModes.cs" />
+    <Compile Include="TileViewPort\TVPC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TileViewPort\Utility.cs" />
+    <Compile Include="TileViewPort\VariousRectangleAndGrid.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Reference Include="OpenTK, Version=1.0.0.201, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
     <Reference Include="OpenTK.GLControl, Version=1.0.0.201, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TileViewPort\TileViewPort\TileViewPort.csproj">
-      <Project>{184C5F5E-ABC7-4911-BAD7-E4A4F7587E71}</Project>
-      <Name>TileViewPort</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="bright_marquee.frame_1.alpha.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bright_marquee.frame_1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bright_marquee.frame_2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bright_marquee.frame_3.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bright_marquee.frame_4.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="example_all_facings.4_frames.intra_1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="example_wave_test.intra_1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="lava.wave_down.speed_4.frames_8.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="U4.B_enhanced-32x32.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="whirlpool_bright.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

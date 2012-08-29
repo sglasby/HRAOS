@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WinForms_display_bitmap
-{
     public abstract class HaxObj : ObjectRegistrar.IHaximaSerializeable
     {
         public int ID { get; private set; }
@@ -24,5 +22,3 @@ namespace WinForms_display_bitmap
         public int sprite_ID { get; set; }
         public string name   { get; set; }
     } // class Terrain
-
-} // namespace WinForms_display_bitmap

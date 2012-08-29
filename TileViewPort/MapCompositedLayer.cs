@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 
 
-namespace WinForms_display_bitmap
-{
+
     public class MapCompositedLayer : IGridIterable
     {
         public int width  { get; set; }
@@ -105,5 +104,3 @@ namespace WinForms_display_bitmap
         public int max_y() { return Math.Max(0, height - 1); }
 
     } // class MapCompositedLayer
-
-}

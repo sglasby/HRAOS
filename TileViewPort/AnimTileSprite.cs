@@ -41,6 +41,18 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
 //        // This overload has an empty method body
 //    } // TileSprite(TileSheet,tex,x,y,w,h)
 
+    public void GDI_Draw_Tile(Graphics gg, int xx, int yy, ImageAttributes attrib, int frame) {
+        // Keeping this around, as it may prove convenient to be able 
+        // to draw a tile onto a Control for certain UI purposes.
+
+        // Draw the region this.rect of the image onto gg at xx,yy, with no scaling
+        Rectangle rr = this.rect(frame);
+        Rectangle destRect = new Rectangle(xx, yy, rr.Width, rr.Height);
+        gg.DrawImage(_image,
+                     new Rectangle(xx, yy, rr.Width, rr.Height),
+                     rr.X, rr.Y, rr.Width, rr.Height,
+                     GraphicsUnit.Pixel, attrib);
+    } // GDI_Draw_Tile()
 
 } // class
 

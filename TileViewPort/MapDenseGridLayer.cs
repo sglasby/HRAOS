@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WinForms_display_bitmap
-{
+
     // REFACTORING: Replaced MapDenseGridLayer with DenseGrid
     public class MapDenseGridLayer : IGridIterable
     {
@@ -72,5 +71,3 @@ namespace WinForms_display_bitmap
         public int max_y() { return Math.Max(0, height - 1); }
 
     } // class MapDenseGridLayer
-
-} // namespace

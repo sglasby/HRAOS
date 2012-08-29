@@ -1,78 +1,45 @@
 ﻿using System;
-
+using System.Windows.Forms;
 using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 
 public class TVPC : OpenTK.GLControl {
+    // public int Width;   // Width  in pixels, inherited from System.Windows.Forms.Control
+    // public int Height;  // Height in pixels, inherited from System.Windows.Forms.Control
 
-    public TilingModes tiling_mode;
-
-    public int tile_grid_offset_x_px;  // offset for smooth-scrolling of tile grid rendering
-    public int tile_grid_offset_y_px;  // offset for smooth-scrolling of tile grid rendering
-    // public bool render_only_integral_tiles { get; set; }  // _maybe_ add such a feature, after all else works smoothly...
-
-    // public int this.Width;   // Width  in pixels, inherited from System.Windows.Forms.Control
-    // public int this.Height;  // Height in pixels, inherited from System.Windows.Forms.Control
-
+    // Note that (tile_width_px, tile_height_px) could differ from that specified in a TileSheet, thus rendering smaller/larger...
     public int tile_width_px;   // Width  to render a single tile, in pixels
     public int tile_height_px;  // Height to render a single tile, in pixels
 
-    //private int? Width_in_tiles;   // Cached calculation, change upon resize
-    //private int? Height_in_tiles;  // Cached calculation, change upon resize
-    public int width_in_tiles {
-        get {
-            return (this.Width / this.tile_width_px);
+    private bool loaded;  // Set in OnLoad()
+    public  int  frame = 0;  // Current animation frame.  Should likely be program-wide, rather than per-TVPC
 
-            //if (Width_in_tiles != null) { return (int) Width_in_tiles; }
-            //// If this.Width does not divide evenly, we add an extra tile (integer division rounds down)
-            //int non_integral_width_tile = (this.Width % this.tile_width_px != 0) ? 1 : 0;
-            //int ww = (this.Width / this.tile_width_px);
-            //// Depending on partial-tile-scroll position,
-            //// the TileViewPort may need to render (ww + non_integral_width_tile), 
-            //// plus an extra columns of tiles along the left and right:
-            //Width_in_tiles = (ww + non_integral_width_tile + 2);
-            //return (int) Width_in_tiles;
-        }
+    public TilingModes      tiling_mode;
+    public SimpleMapV1      map { get; private set; }
+    public IGridIterable[]  layers = null;
+    public ScrollConstraint scroll_constraint { get; set; }
+
+    public int tile_grid_offset_x_px;  // offset for smooth-scrolling of tile grid rendering
+    public int tile_grid_offset_y_px;  // offset for smooth-scrolling of tile grid rendering
+
+    public int padding_x_px;  // Number of pixels between tiles (usually 0, useful for debugging and such)
+    public int padding_y_px;  // Number of pixels between tiles (usually 0, useful for debugging and such)
+
+    // public bool render_only_integral_tiles { get; set; }  // _maybe_ add such a feature, after all else works smoothly...
+
+    public int width_in_tiles {
+        get { return (this.Width / this.tile_width_px); }
     }
     public int height_in_tiles {
-        get {
-            return (this.Width / this.tile_height_px);
-
-            //if (Height_in_tiles != null) { return (int) Height_in_tiles; }
-            //// If this.Height does not divide evenly, we add an extra tile (integer division rounds down)
-            //int non_integral_height_tile = (this.Height % this.tile_height_px != 0) ? 1 : 0;
-            //int hh = (this.Height / this.tile_height_px);
-            //// Depending on partial-tile-scroll position,
-            //// the TileViewPort may need to render (hh + non_integral_height_tile), 
-            //// plus an extra row of tiles along the top and bottom:
-            //Height_in_tiles = (hh + non_integral_height_tile + 2);
-            //return (int) Height_in_tiles;
-        }
+        get { return (this.Height / this.tile_height_px); }
     }
 
     private void allocate_layers() {
         this.layers = new IGridIterable[ViewPortLayers.COUNT];
         this.layers[ViewPortLayers.UI_Elements] = new DenseGrid(width_in_tiles, height_in_tiles, 0);
-        //Width_in_tiles  = null;  // Force re-calculation upon next access
-        //Height_in_tiles = null;  // Force re-calculation upon next access
     }
-
-    // TODO: 
-    // Verify whether this.OnResize() will get called (since response to the Resize event is inherited),
-    // or whether it is needful to explicitly set it up, via a call like
-    // this.Resize += new System.Windows.Forms.PaintEventHandler(this.OnResize);
-    void OnResize(object sender, EventArgs ee) {
-        allocate_layers();
-    }
-
-    // public int Width;   // in pixels, of the control, inherited from System.Windows.Forms.Control
-    // public int Height;  // in pixels, of the control, inherited from System.Windows.Forms.Control
-
-    public SimpleMapV1      map { get; private set; }
-    public IGridIterable[]  layers = null;
-    public ScrollConstraint scroll_constraint { get; set; }
 
     private int X_origin;
     private int Y_origin;
@@ -171,8 +138,15 @@ public class TVPC : OpenTK.GLControl {
         this.scroll_constraint = constraint_arg;
         this.tiling_mode       = TilingModes.Square;
 
-        this.tile_grid_offset_x_px = 0;
-        this.tile_grid_offset_y_px = 0;
+        this.padding_x_px = 0;
+        this.padding_y_px = 0;
+
+        this.tile_grid_offset_x_px = 0;  // Partial-tile scrolling can result in non-zero values
+        this.tile_grid_offset_y_px = 0;  // Partial-tile scrolling can result in non-zero values
+
+        this.Load   += this.OnLoad;
+        this.Paint  += this.OnPaint;
+        this.Resize += this.OnResize;
     } // TVPC()
 
     // possibly other constructors, specifying control.Width, control.Height, etc...
@@ -238,6 +212,10 @@ public class TVPC : OpenTK.GLControl {
         this.y_origin = yy;
         allocate_layers();
 
+        // The resulting coordinates may differ from those specified by args,
+        // either due to out-of-map-bounds coordinates which were clamp()ed,
+        // or due to the scroll_constraint.  
+        // If so, return false, so that our caller (if it cares) can distinguish.
         if ((map_xx != xx) || (map_yy != yy)) { return false; }
         return true;  // The specified coordinates were set, without adjustment
     } // set_origin()
@@ -255,9 +233,11 @@ public class TVPC : OpenTK.GLControl {
         this.x_origin = xx - center_x;
         this.y_origin = yy - center_y;
         allocate_layers();
+
         // The resulting coordinates may differ from those specified by args,
         // either due to out-of-map-bounds coordinates which were clamp()ed,
-        // or due to the scroll_constraint.  If so, return false.
+        // or due to the scroll_constraint.  
+        // If so, return false, so that our caller (if it cares) can distinguish.
         if (this.x_origin != map_xx - center_x) { return false; }
         if (this.y_origin != map_yy - center_y) { return false; }
         return true;  // The specified coordinates were set, without adjustment
@@ -265,14 +245,19 @@ public class TVPC : OpenTK.GLControl {
 
     public void Render(int frame) {
         if (this.Parent == null) { return; }  // Avoid rendering if not in a Form...is this check needful?
-        int tile_width  = this.map.sheet.tile_wide_px;  // is this used now?
-        int tile_height = this.map.sheet.tile_high_px;  // is this used now?
-        GL.ClearColor(Color.Green);
+        GL.ClearColor(Color.Green);  // This color will appear on off-map regions, and any between-tiles padding pixels
 
+        // The various coordinates which are used:
+        // ( view_xx,  view_yy) are viewport tile coordinates of the tile to render
+        // (  map_xx,   map_xx) are      map tile coordinates of a map tile to render (or else, off-map)
+        // (pixel_xx, pixel_yy) are        pixel coordinates on screen for the (top left) origin of the tile to render
         for (int view_yy = 0; view_yy < this.height_in_tiles; view_yy++) {
             for (int view_xx = 0; view_xx < this.width_in_tiles; view_xx++) {
                 int map_xx = this.x_origin + view_xx;
                 int map_yy = this.y_origin + view_yy;
+
+                int pixel_xx = (view_xx * (this.tile_width_px  + this.padding_x_px)) + this.tile_grid_offset_x_px;
+                int pixel_yy = (view_yy * (this.tile_height_px + this.padding_y_px)) + this.tile_grid_offset_y_px;
 
                 bool on_map = ((map_xx >= 0) &&
                                (map_xx < this.map.width) &&
@@ -280,15 +265,12 @@ public class TVPC : OpenTK.GLControl {
                                (map_yy < this.map.height));
                 if (!on_map) { goto RENDER_VIEWPORT_TILES; }
 
-                RENDER_MAP_TILES:
-                int pixel_xx = (view_xx * tile_width_px)  + tile_grid_offset_x_px;
-                int pixel_yy = (view_yy * tile_height_px) + tile_grid_offset_y_px;
-
+                //RENDER_MAP_TILES:  // Commented this out to shut up a compiler warning about an unused label
                 // First, render sprites from MAP layers:
                 foreach (int LL in MapLayers.MapRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.map.contents_at_LXY(LL, map_xx, map_yy);
                     if (sp != null) {
-                        this.blit_square_tile(view_xx, view_yy, sp.texture(frame) );
+                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(frame) );
                     }
                 } // foreach(LL)
 
@@ -297,7 +279,7 @@ public class TVPC : OpenTK.GLControl {
                 foreach (int LL in ViewPortLayers.ViewPortRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.contents_at_LXY(LL, view_xx, view_yy);
                     if (sp != null) {
-                        this.blit_square_tile(view_xx, view_yy, sp.texture(frame) );
+                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(frame) );
                     }
                 } // foreach(LL)
 
@@ -305,24 +287,19 @@ public class TVPC : OpenTK.GLControl {
         } //  for(view_yy)
     } // Render()
 
-    public void blit_square_tile(int tile_grid_xx, int tile_grid_yy, int texture_id) {
-        // clamp tile_grid_xx
-        // clamp tile_grid_yy
-        double xx = tile_grid_xx * this.tile_width_px;
-        double yy = tile_grid_yy * this.tile_height_px;
-
+    public void blit_square_tile(int pixel_xx, int pixel_yy, int texture_id) {
         // Define OpenGL vertex coordinates for a square centered on the origin (0.0, 0.0)
-        double LL = -(this.tile_width_px / 2);
-        double RR = +(this.tile_width_px / 2);
+        double LL = -(this.tile_width_px  / 2);
+        double RR = +(this.tile_width_px  / 2);
         double TT = -(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
         double BB = +(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
 
-        double HALF_TILE_WW = this.tile_width_px / 2;
+        double HALF_TILE_WW = this.tile_width_px  / 2;
         double HALF_TILE_HH = this.tile_height_px / 2;
         const double angle = 0.0;
 
         GL.PushMatrix();
-        GL.Translate((xx + HALF_TILE_WW), (yy + HALF_TILE_HH), 0);
+        GL.Translate((pixel_xx + HALF_TILE_WW), (pixel_yy + HALF_TILE_HH), 0);
         GL.Rotate(angle, 0.0, 0.0, -1.0);
 
         GL.BindTexture(TextureTarget.Texture2D, texture_id);
@@ -339,6 +316,51 @@ public class TVPC : OpenTK.GLControl {
         GL.PopMatrix();
     } // blit_square_tile()
 
+
+    private void OnLoad(object sender, EventArgs e) {
+        SetupViewport();
+        //GL.Disable(EnableCap.CullFace);
+        GL.Enable(EnableCap.Texture2D);
+        GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+
+        // In theory, these (plus sheet.MakeTransparent(Color.Magenta) in TileSheet.cs) should enable transparency...
+        GL.Enable(EnableCap.Blend);
+        GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+        GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+
+        loaded = true;
+    } // OnLoad()
+
+    private void SetupViewport() {
+        // This exists here, in part because there are two callers:  glControl1_Load() and glControl1_Resize()
+        // TODO: This code may belong in TileViewPortControl (when it isa GLControl)
+        GL.MatrixMode(MatrixMode.Projection);  // Why MatrixMode.Projection here, and .Modelview in glControl1_Paint() ?
+        GL.LoadIdentity();
+        GL.Ortho(0, this.Width, this.Height, 0, 0, 1);  // OpenGL origin coordinate (0,0) is at bottom left; we want origin at top left
+        GL.Viewport(0, 0, this.Width, this.Height);     // Use all of the GLControl area for the GL Viewport
+    } // SetupViewport()
+
+    private void OnPaint(object sender, PaintEventArgs e) {
+        if (!loaded)
+            return;
+
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        GL.MatrixMode(MatrixMode.Modelview);    // Why MatrixMode.Modelview here, and .Projection in SetupViewport() ?
+        GL.LoadIdentity();
+        this.Render(frame);
+
+        GL.Flush();
+        this.SwapBuffers();
+    } // glControl1_Paint()
+
+    private void OnResize(object sender, EventArgs e) {
+        // Hmmm...when exactly does the GLControl get resized?  (Seems to be: Upon construction, and then when?)
+        allocate_layers();
+        SetupViewport();
+        this.Invalidate();
+    }
 
 } // class
 
