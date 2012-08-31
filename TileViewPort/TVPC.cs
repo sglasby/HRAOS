@@ -24,8 +24,13 @@ public class TVPC : OpenTK.GLControl {
     public int tile_grid_offset_x_px;  // offset for smooth-scrolling of tile grid rendering
     public int tile_grid_offset_y_px;  // offset for smooth-scrolling of tile grid rendering
 
-    public int padding_x_px;  // Number of pixels between tiles (usually 0, useful for debugging and such)
-    public int padding_y_px;  // Number of pixels between tiles (usually 0, useful for debugging and such)
+    private int _padding_px;
+    public int padding_px {
+        // Number of pixels between tiles in the tile grid 
+        // Usually set to zero, but useful for debugging and for printed maps
+        get { return _padding_px; }
+        set { _padding_px = Utility.clamp(0, this.tile_width_px, value); }
+    }
 
     // public bool render_only_integral_tiles { get; set; }  // _maybe_ add such a feature, after all else works smoothly...
 
@@ -137,9 +142,7 @@ public class TVPC : OpenTK.GLControl {
 
         this.scroll_constraint = constraint_arg;
         this.tiling_mode       = TilingModes.Square;
-
-        this.padding_x_px = 0;
-        this.padding_y_px = 0;
+        this.padding_px      = 0;
 
         this.tile_grid_offset_x_px = 0;  // Partial-tile scrolling can result in non-zero values
         this.tile_grid_offset_y_px = 0;  // Partial-tile scrolling can result in non-zero values
@@ -147,6 +150,9 @@ public class TVPC : OpenTK.GLControl {
         this.Load   += this.OnLoad;
         this.Paint  += this.OnPaint;
         this.Resize += this.OnResize;
+
+        // Pass all key events to the parent form:
+        this.PreviewKeyDown += new PreviewKeyDownEventHandler(OnPreviewKeyDown);
     } // TVPC()
 
     // possibly other constructors, specifying control.Width, control.Height, etc...
@@ -256,8 +262,8 @@ public class TVPC : OpenTK.GLControl {
                 int map_xx = this.x_origin + view_xx;
                 int map_yy = this.y_origin + view_yy;
 
-                int pixel_xx = (view_xx * (this.tile_width_px  + this.padding_x_px)) + this.tile_grid_offset_x_px;
-                int pixel_yy = (view_yy * (this.tile_height_px + this.padding_y_px)) + this.tile_grid_offset_y_px;
+                int pixel_xx = (view_xx * (this.tile_width_px  + this.padding_px)) + this.tile_grid_offset_x_px;
+                int pixel_yy = (view_yy * (this.tile_height_px + this.padding_px)) + this.tile_grid_offset_y_px;
 
                 bool on_map = ((map_xx >= 0) &&
                                (map_xx < this.map.width) &&
@@ -361,6 +367,34 @@ public class TVPC : OpenTK.GLControl {
         SetupViewport();
         this.Invalidate();
     }
+
+    public void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs ee) {
+        // By default, certain key events are pre-processed by the Form,
+        // before any contained Control gets that key event.
+        // This occurs for (TAB, RETURN, ESC, UP ARROW, DOWN ARROW, LEFT ARROW, RIGHT ARROW),
+        // which are of interest to us in our handling.
+        // 
+        // We desire to handle key events in the form, thus this method is
+        // an event handler for PreviewKeyDown which causes the key events
+        // for those keys to be passed on to the form, by means of
+        // setting e.IsInputKey = true for the wanted keys. 
+        //     http://msdn.microsoft.com/en-us/library/system.windows.forms.control.previewkeydown.aspx
+
+        switch (ee.KeyCode) {
+            case Keys.Tab:
+            case Keys.Return:
+            case Keys.Escape:
+                ee.IsInputKey = true;
+                break;
+
+            case Keys.Up:
+            case Keys.Down:
+            case Keys.Left:
+            case Keys.Right:
+                ee.IsInputKey = true;
+                break;
+        }
+    } // OnPreviewKeyDown()
 
 } // class
 

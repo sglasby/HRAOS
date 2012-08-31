@@ -25,8 +25,8 @@ namespace OpenGLForm {
 
         public Form1() {
             this.tvpc = new TVPC(512, 512, 32, 32, ScrollConstraint.CenterTile);
-            //this.tvpc.padding_x_px = 0;
-            //this.tvpc.padding_y_px = 0;
+            //this.tvpc.padding_x_px = 1;
+            //this.tvpc.padding_y_px = 1;
             this.tvpc.Location = new Point(10, 10);
             //this.tvpc.Anchor = AnchorStyles.Left | AnchorStyles.Right;  // Not working right...may indicate a bug in TVPC somewhere...
             this.tvpc.TabIndex = 0;
@@ -49,10 +49,14 @@ namespace OpenGLForm {
 
             Application.Idle += Application_Idle;
             sw.Start(); // start the Stopwatch, which is used to alter the label1.Text via Accumulate() and Animate()
-            this.KeyPreview = true;
-            this.KeyDown += new KeyEventHandler(OnKeyDown);
-            // TODO: still need to set up PreviewKeyDown event handling, to allow arrow keys to work...
-            // TODO: See notes in OnKeyDown()
+
+            // Set up key handling by the Form:
+            // (Some mode-specific key handling may still be done by individual controls)
+            // In addition to the setup here, contained controls (such as this.tvpc)
+            // may need to handle the PreviewKeyDown event, as seen in TVPC.cs OnPreviewKeyDown()
+            this.KeyPreview  = true;
+            this.KeyDown    += new KeyEventHandler(OnKeyDown);
+            // When additional controls are added into this Form, revisit this if needed...
 
         } // Form1()
 
@@ -178,7 +182,7 @@ namespace OpenGLForm {
         } // OnShown()
 
 
-
+        int x_pixel_shift;
         public void OnKeyDown(object sender, KeyEventArgs ee) {
             // By default, certain key events are pre-processed by the Form,
             // before any contained Control gets that key event.
@@ -192,7 +196,7 @@ namespace OpenGLForm {
             //       http://msdn.microsoft.com/en-us/library/system.windows.forms.control.isinputkey.aspx
             // 
             //     - To handle key events in the form, and to implement 
-            //       an event handler for PreviewKeyDown on the form, 
+            //       an event handler for PreviewKeyDown on control(s) which would otherwise "eat" the key events, 
             //       setting e.IsInputKey = true for the wanted keys. 
             //       http://msdn.microsoft.com/en-us/library/system.windows.forms.control.previewkeydown.aspx
             //
@@ -213,6 +217,22 @@ namespace OpenGLForm {
             // 
             // On the other hand, key repeat works now, and the scrolling speed is excellent!
 
+            // First attempts at a smooth-scroll mode:
+            x_pixel_shift = 0;
+            if ((ee.Modifiers & Keys.Shift) != 0) {
+                if (ee.KeyCode == Keys.Left ||
+                    ee.KeyCode == Keys.NumPad4) { // West
+                        x_pixel_shift = +32;
+                }
+                if (ee.KeyCode == Keys.Right ||
+                    ee.KeyCode == Keys.NumPad6) { // East
+                        x_pixel_shift = -32;
+                }
+                return;
+            } // Handling SHIFT for smooth-scroll left/right
+
+
+            // Arrow keys and Number pad (with and without NumLock) are set to scroll the viewport 1 tile:
             if (ee.KeyCode == Keys.Down ||
                 ee.KeyCode == Keys.NumPad2) { // South
                 tvpc.y_origin++;
@@ -271,6 +291,8 @@ namespace OpenGLForm {
 
         // The animation loop (variables and methods) here should be program-global
         // (I see no utility in having differently-synched animation loops in different TVPCs)
+        // We could certainly desire that the "current frame" for a particular ITileSprite might be different, however...
+        // 
         // Perhaps the rest of these (variables and methods) should be moved somewhere other than Form1.cs
         // (this.frame was moved to tvpc.frame)
         double    accum_ms    = 0;
@@ -280,6 +302,16 @@ namespace OpenGLForm {
         const int cycle_period = 6000;   // Number of milliseconds per cycle of animation frames
         const int periodicity  = 24;     // This should be the Least_Common_Multiple of all distinct (ITileSprite.num_frames) values
         const int tick_time    = cycle_period / periodicity;  // M / N --> N animation updates per M milliseconds
+
+        // TODO: 
+        // - Smooth-scrolling of the viewport, 
+        // - Smooth-scrolling of an individual tile moving to an adjacent tile (later)
+        // 
+        // The pixels-to-smooth-scroll per increment should be scrolled more than once per animation frame,
+        // so the scheme of time units will change to something like:
+        // 1 anim frame per "tick", and 1 n_pixels of smooth-scrolling scrolling per "quanta"
+        // 
+        // For now, a prototype of smooth-scroll is hooked up to SHIFT+Left Arrow / SHIFT+Right Arrow
 
         // TODO: 
         // Consider means of the master 'frame' being supplemented by per-object current_frame counters, for some objects.
@@ -296,10 +328,31 @@ namespace OpenGLForm {
             accum_ms += milliseconds;
             if (accum_ms >= tick_time) {
                 num_ticks++;
+
+                // 1 anim frame per "tick"
+                num_ticks++;
                 tvpc.frame = num_ticks % periodicity;
+
+                // First attempt at a smooth-scroll mode:
+                if (x_pixel_shift != 0) {
+                    int n_pixels   = 4;  // n_pixels per smooth scroll increment
+                    int offset     = (x_pixel_shift > 0) ? +n_pixels : -n_pixels;
+                    int val        = this.tvpc.tile_grid_offset_x_px + offset;
+                    x_pixel_shift -= offset;
+
+                    // ...This code shows smooth-scrolling, but it is not right yet.
+                    //    The x_origin needs to change in concert with the tile_grid_offset_x_px...
+
+                    int min = -this.tvpc.tile_width_px;
+                    int max = +this.tvpc.tile_width_px;
+                    this.tvpc.tile_grid_offset_x_px = Utility.clamp(min, max, val);
+                    // Next redraw should have the tile grid offset by n_pixels in the indicated direction,
+                    // and again the next tick, until x_pixel_shift is decremented to zero...
+                }
                 this.Invalidate();  // Needful here, so that GDI-anim redraws occur
-                label1.Text = String.Format("AnimRate=({0} frames / {1} ms) -- Tick={2,4}, Frame={3,2} -- This Tick: {4,3} ms, with {5,3} Idle events",
-                                            periodicity, cycle_period, num_ticks, tvpc.frame, (int) accum_ms, idleCounter);
+                label1.Text = String.Format("AnimRate=({0} frames / {1} ms) -- Tick={2,4}, Frame={3,2}/{4,2} -- This Tick: {5,3} ms, with {6,3} Idle events",
+                                            periodicity, cycle_period, num_ticks, tvpc.frame, periodicity, (int) accum_ms, idleCounter);
+
                 idleCounter = 0;
                 accum_ms -= tick_time;
             }
