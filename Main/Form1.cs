@@ -25,8 +25,7 @@ namespace OpenGLForm {
 
         public Form1() {
             this.tvpc = new TVPC(512, 512, 32, 32, ScrollConstraint.CenterTile);
-            //this.tvpc.padding_x_px = 1;
-            //this.tvpc.padding_y_px = 1;
+            this.tvpc.padding_px = 1;
             this.tvpc.Location = new Point(10, 10);
             //this.tvpc.Anchor = AnchorStyles.Left | AnchorStyles.Right;  // Not working right...may indicate a bug in TVPC somewhere...
             this.tvpc.TabIndex = 0;
@@ -84,6 +83,7 @@ namespace OpenGLForm {
             f1234 = new TileSheet(@"Main/example_all_facings.4_frames.intra_1.png", 4, 9, 32, 32, 1, 1, 1, 1);
             ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.png", 4, 4);  // Sprite ID 272 is the reticle
             //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.png", 4, 4);  // Hmmm...not quite right...
+            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.2.png", 4, 4);  // Hmmm...not quite right...
             wp_ts = new TileSheet(@"Main/whirlpool_bright.png", 4, 1);
 
             // TODO: 
@@ -327,8 +327,6 @@ namespace OpenGLForm {
             idleCounter++;
             accum_ms += milliseconds;
             if (accum_ms >= tick_time) {
-                num_ticks++;
-
                 // 1 anim frame per "tick"
                 num_ticks++;
                 tvpc.frame = num_ticks % periodicity;
@@ -372,7 +370,7 @@ namespace OpenGLForm {
             // but it is nice to have the capability.
 
             Graphics         gg  = this.CreateGraphics();
-            StaticTileSprite spr = ts[8, 1];  // Balloon
+            StaticTileSprite spr = ui_ts[3, 3];// ts[8, 1];  // Balloon
             AnimTileSprite   ani = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;

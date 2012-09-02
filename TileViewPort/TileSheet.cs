@@ -89,7 +89,7 @@ public class TileSheet {
         // when I attempt sheet.MakeTransparent(Color.Magenta) to get transparency via color-key, 
         // as seen in _working_ OpenGL examples...
         this.sheet = new Bitmap(fileName);
-        //this.sheet.MakeTransparent(Color.Magenta);  // I am seeing (very) messed up colors, but the result _is_ transparent on Magenta...
+        this.sheet.MakeTransparent(Color.Magenta);  // I am seeing (very) messed up colors, but the result _is_ transparent on Magenta...
 
         // Check image dimensions against args:
         // TODO: extract a method/property for calc_min_ww, calc_min_hh (rect_for_tile() is another caller)...
@@ -135,10 +135,12 @@ public class TileSheet {
                 GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
                 GL.BindTexture(TextureTarget.Texture2D, GL_textures[ii]);
+                
                 Rectangle  tile_rect = rect_for_tile(xx, yy);
                 BitmapData tile_data = sheet.LockBits(tile_rect,
                                                       ImageLockMode.ReadOnly,
-                                                      System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                                                      System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+
                 GL.TexImage2D(TextureTarget.Texture2D,
                               0,
                               PixelInternalFormat.Rgba,
@@ -150,8 +152,8 @@ public class TileSheet {
                               tile_data.Scan0);
                 sheet.UnlockBits(tile_data);
 
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
                 tile_rects[ii] = new StaticTileSprite(this, GL_textures[ii], tile_rect);
             } // for(xx)
