@@ -46,6 +46,9 @@
     <Content Include="Main\bright_marquee.frame_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Main\bright_marquee.frame_1234.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Main\bright_marquee.frame_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -81,9 +81,10 @@ namespace OpenGLForm {
 
             ts = new TileSheet(@"Main/U4.B_enhanced-32x32.png", 16, 16);  // causes GL textures to be loaded, needs some GL setup prior...
             f1234 = new TileSheet(@"Main/example_all_facings.4_frames.intra_1.png", 4, 9, 32, 32, 1, 1, 1, 1);
-            ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.png", 4, 4);  // Sprite ID 272 is the reticle
-            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.png", 4, 4);  // Hmmm...not quite right...
-            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.2.png", 4, 4);  // Hmmm...not quite right...
+            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.png", 4, 4);
+            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.png", 4, 4);
+            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.2.png", 4, 4);
+            ui_ts = new TileSheet(@"Main/bright_marquee.frame_1234.png", 4, 1);
             wp_ts = new TileSheet(@"Main/whirlpool_bright.png", 4, 1);
 
             // TODO: 
@@ -172,7 +173,9 @@ namespace OpenGLForm {
 
             // Add some elements to the UI_elements layer of the TileViewPort:
 
-            int reticle = ui_ts[3, 3].ID;  // avoiding hard-coding Sprite ID 272
+            //int reticle = ui_ts[3, 3].ID;  // avoiding hard-coding Sprite ID 272
+            AnimTileSprite anim_reticle = new AnimTileSprite(ui_ts, ui_ts[0], ui_ts[1], ui_ts[2], ui_ts[3]);
+            int reticle = anim_reticle.ID;
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             reticle);  // NE
@@ -370,7 +373,7 @@ namespace OpenGLForm {
             // but it is nice to have the capability.
 
             Graphics         gg  = this.CreateGraphics();
-            StaticTileSprite spr = ui_ts[3, 3];// ts[8, 1];  // Balloon
+            StaticTileSprite spr = ui_ts[0, 0];  // 3,3 on the 4x4 marquee sheet
             AnimTileSprite   ani = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;
