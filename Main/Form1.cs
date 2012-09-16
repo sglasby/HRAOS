@@ -25,7 +25,7 @@ namespace OpenGLForm {
 
         public Form1() {
             this.tvpc = new TVPC(512, 512, 32, 32, ScrollConstraint.CenterTile);
-            this.tvpc.padding_px = 1;
+            this.tvpc.padding_px = 0;
             this.tvpc.Location = new Point(10, 10);
             //this.tvpc.Anchor = AnchorStyles.Left | AnchorStyles.Right;  // Not working right...may indicate a bug in TVPC somewhere...
             this.tvpc.TabIndex = 0;

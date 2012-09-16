@@ -139,7 +139,11 @@ public class TileSheet {
                 Rectangle  tile_rect = rect_for_tile(xx, yy);
                 BitmapData tile_data = sheet.LockBits(tile_rect,
                                                       ImageLockMode.ReadOnly,
-                                                      System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+                                                      System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                // PixelFormat values for the last arg seem to produce OS-dependent results???
+                // I observe: 
+                // Format32bppPArgb --> ___ for Windows 7,          transparent for WinXP, transparent for Unbuntu Linux
+                // Format32bppRgb   --> transparency for Windows 7, black for WinXP,       magenta for Ubuntu Linux
 
                 GL.TexImage2D(TextureTarget.Texture2D,
                               0,
