@@ -309,6 +309,7 @@ public class TVPC : OpenTK.GLControl {
         GL.Rotate(angle, 0.0, 0.0, -1.0);
 
         GL.BindTexture(TextureTarget.Texture2D, texture_id);
+        TileSheet.Check_for_GL_error("In blit_square_tile() after calling GL.BindTexture()");
 
         GL.Begin(BeginMode.Quads);
         {
@@ -334,6 +335,7 @@ public class TVPC : OpenTK.GLControl {
         GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
         GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+        TileSheet.Check_for_GL_error("In TVPC.OnLoad() after calling GL.Hint()");
 
         loaded = true;
     } // OnLoad()
@@ -345,6 +347,7 @@ public class TVPC : OpenTK.GLControl {
         GL.LoadIdentity();
         GL.Ortho(0, this.Width, this.Height, 0, 0, 1);  // OpenGL origin coordinate (0,0) is at bottom left; we want origin at top left
         GL.Viewport(0, 0, this.Width, this.Height);     // Use all of the GLControl area for the GL Viewport
+        TileSheet.Check_for_GL_error("In TVPC.SetupViewport() after calling GL.Viewport()");
     } // SetupViewport()
 
     private void OnPaint(object sender, PaintEventArgs e) {

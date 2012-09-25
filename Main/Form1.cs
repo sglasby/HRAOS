@@ -90,8 +90,8 @@ namespace OpenGLForm {
             // TODO: 
             // After setting up all these AnimTileSprite instances, the utility is clear for
             // various constructor overloads which infer the wanted StaticTileSprite IDs...
-            AnimTileSprite anim_blue_wiz = new AnimTileSprite(ts, ts[32], ts[33]);
-            AnimTileSprite anim_red_wiz  = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
+            AnimTileSprite anim_blue_wiz = new AnimTileSprite(ts, 32, 33);  // Note the one-index constructor
+            AnimTileSprite anim_red_wiz  = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);  // Note the 2-index constructor
 
             // Counters for 3 frames (A,B,C) and for 4 frames (1,2,3,4)
             // This illustrates why the master frame cycle need be the Least Common Multiple of (3,4) 
@@ -99,10 +99,10 @@ namespace OpenGLForm {
             AnimTileSprite count_ABC     = new AnimTileSprite(ts, ts[0, 6], ts[1, 6], ts[2, 6]);
             AnimTileSprite count_1234    = new AnimTileSprite(f1234, f1234[0, 0], f1234[1, 0], f1234[2, 0], f1234[3, 0]);
 
-            AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, wp_ts[0], wp_ts[1], wp_ts[2], wp_ts[3]);
+            AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, 0, 1, 2, 3);
 
             LF = new TileSheet(@"Main/lava.wave_down.speed_4.frames_8.png", 8, 1);  // LF == LavaFlow
-            AnimTileSprite lava_flow = new AnimTileSprite(LF, LF[0], LF[1], LF[2], LF[3], LF[4], LF[5], LF[6], LF[7]);
+            AnimTileSprite lava_flow = new AnimTileSprite(LF, 0, 1, 2, 3, 4, 5, 6, 7);
 
             // TileSheet TW = new TileSheet(@"Main/example_wave_test.intra_1.png", 1, 9);  // Will need WaveTileSprite to support this...
 
@@ -174,7 +174,7 @@ namespace OpenGLForm {
             // Add some elements to the UI_elements layer of the TileViewPort:
 
             //int reticle = ui_ts[3, 3].ID;  // avoiding hard-coding Sprite ID 272
-            AnimTileSprite anim_reticle = new AnimTileSprite(ui_ts, ui_ts[0], ui_ts[1], ui_ts[2], ui_ts[3]);
+            AnimTileSprite anim_reticle = new AnimTileSprite(ui_ts, 0, 1, 2, 3);
             int reticle = anim_reticle.ID;
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
@@ -292,6 +292,14 @@ namespace OpenGLForm {
             tvpc.Invalidate();  // Needed here for TVPC animation (calling it within Accumulate() does not work as desired)
         }
 
+        private double ComputeTimeSlice() {
+            sw.Stop();
+            double timeslice = sw.Elapsed.TotalMilliseconds;
+            sw.Reset();
+            sw.Start();
+            return timeslice;
+        }
+
         // The animation loop (variables and methods) here should be program-global
         // (I see no utility in having differently-synched animation loops in different TVPCs)
         // We could certainly desire that the "current frame" for a particular ITileSprite might be different, however...
@@ -359,28 +367,21 @@ namespace OpenGLForm {
             }
         } // Accumulate()
 
-        private double ComputeTimeSlice() {
-            sw.Stop();
-            double timeslice = sw.Elapsed.TotalMilliseconds;
-            sw.Reset();
-            sw.Start();
-            return timeslice;
-        }
-
         private void OnPaint(object sender, PaintEventArgs ee) {
             // Demonstrate the GDI_Draw_Tile() method on top of the main form
             // Not sure how often such a thing will be wanted for UI purposes, 
             // but it is nice to have the capability.
 
             Graphics         gg  = this.CreateGraphics();
-            StaticTileSprite spr = ui_ts[0, 0];  // 3,3 on the 4x4 marquee sheet
+            //StaticTileSprite spr = ui_ts[0, 0];  // 3,3 on the 4x4 marquee sheet
+            AnimTileSprite   spr = new AnimTileSprite(ui_ts, 0, 1, 2, 3);
             AnimTileSprite   ani = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;
             int x2 = 10 + 32 + 10;             // to the right of the first tile
             int y1 = 512 + 10 + 10 + 13 + 10;  // below the TVPC
-            spr.GDI_Draw_Tile(gg, x1, y1, null);
-            ani.GDI_Draw_Tile(gg, x2, y1, null, tvpc.frame);  // Demonstrate an animated tile via GDI
+            ani.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate an animated tile via GDI
+            spr.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);
 
         } // Form1.OnPaint()
 

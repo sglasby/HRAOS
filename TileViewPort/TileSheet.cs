@@ -125,6 +125,8 @@ public class TileSheet {
         int[] GL_textures = new int[num_tiles];
         GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
         GL.GenTextures(num_tiles, GL_textures);
+        Check_for_GL_error("After calling GL.GenTextures()");
+
         int xx, yy, ii;
         for (yy = 0; yy < this.height_tiles; yy++) {
             for (xx = 0; xx < this.width_tiles; xx++) {
@@ -135,11 +137,12 @@ public class TileSheet {
                 GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
                 GL.BindTexture(TextureTarget.Texture2D, GL_textures[ii]);
-                
+                Check_for_GL_error("After calling GL.BindTexture()");
+
                 Rectangle  tile_rect = rect_for_tile(xx, yy);
                 BitmapData tile_data = sheet.LockBits(tile_rect,
                                                       ImageLockMode.ReadOnly,
-                                                      System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                                                      System.Drawing.Imaging.PixelFormat.Format32bppPArgb);  // This _works_
                 // PixelFormat values for the last arg seem to produce OS-dependent results???
                 // I observe: 
                 // Format32bppPArgb --> ___ for Windows 7,          transparent for WinXP, transparent for Unbuntu Linux
@@ -154,6 +157,8 @@ public class TileSheet {
                               OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
                               PixelType.UnsignedByte,
                               tile_data.Scan0);
+                Check_for_GL_error("After calling GL.TexImage2D()");
+
                 sheet.UnlockBits(tile_data);
 
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
@@ -208,6 +213,14 @@ public class TileSheet {
             return (width_tiles * height_tiles);  // One-based, number of tiles for array allocations
         }
     }
+
+    public static void Check_for_GL_error(string msg) {
+        ErrorCode err = GL.GetError();
+        if (err != ErrorCode.NoError) {
+            string str = String.Format("{0} GL.GetError() returns: {1}", msg, err);
+            throw new Exception(str);
+        }
+    } // Check_for_GL_error()
 
 } // class TileSheet
 

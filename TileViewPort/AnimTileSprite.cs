@@ -24,8 +24,36 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
     public Rectangle rect      (int frame) { int ff = frame % num_frames; return frame_sequence[ff].rect(ff);    }
     public int       texture   (int frame) { int ff = frame % num_frames; return frame_sequence[ff].texture(ff); }
 
-    
+    public AnimTileSprite(TileSheet tile_sheet, params int[] frame_indexes) {
+        // This form of the constructor is more convenient to call when 
+        // the frames are specified via a single index.
+        // When specified by [x,y] within the TileSheet, the other form is needful.
+        // 
+        // TODO: Some means to specify an arg list of (tile_sheet, [x1,y1], [x2,y2], ...)
+        //       If possible, it would be a nicety...
+        if (tile_sheet == null) {
+            throw new ArgumentException("Got null tile_sheet");
+        }
+        if (frame_indexes == null || frame_indexes.Length == 0) {
+            throw new ArgumentException("Got null or empty frame_indexes array");
+        }
+        _tile_sheet    = tile_sheet;
+        num_frames     = frame_indexes.Length;
+        frame_sequence = new StaticTileSprite[num_frames];
+        for (int ii = 0; ii < num_frames; ii++) {
+            int this_tile_index = frame_indexes[ii];
+            frame_sequence[ii]  = tile_sheet[this_tile_index];
+        }
+        this.ID = ObjectRegistrar.Sprites.register_obj_as(this, typeof(ITileSprite) );
+    } // AnimTileSprite(sh,frame_indexes)
+
     public AnimTileSprite(TileSheet tile_sheet, params StaticTileSprite[] anim_frames) {
+        // This form of the constructor is useful if it is desired to specify the frames 
+        // by [x,y] on the TileSheet (or by [x,y,z] on a TileSheetStack).
+        // When a single index will suffice, the other form is handier.
+        if (tile_sheet == null) {
+            throw new ArgumentException("Got null tile_sheet");
+        }
         if (anim_frames == null || anim_frames.Length == 0) {
             throw new ArgumentException("Got null or empty anim_frames array");
         }
@@ -33,7 +61,7 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
         frame_sequence = anim_frames;
         num_frames     = frame_sequence.Length;
         this.ID        = ObjectRegistrar.Sprites.register_obj_as(this, typeof(ITileSprite) );
-    } // TileSprite(sh,tex,Rectangle)
+    } // AnimTileSprite(sh,anim_frames)
     
 
 //    public AnimTileSprite(TileSheet tile_sheet, int OpenGL_texture_id, int xx, int yy, int ww, int hh) :
