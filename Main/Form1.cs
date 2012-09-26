@@ -33,7 +33,7 @@ namespace OpenGLForm {
             this.label1 = new Label();
             this.label1.BackColor = SystemColors.ControlDark;
             this.label1.Location  = new System.Drawing.Point(12, 512 + 10 + 10);
-            this.label1.Size      = new System.Drawing.Size(600, 13);
+            this.label1.Size      = new System.Drawing.Size(600, 2*13);
             this.label1.TabIndex  = 1;
             // label1.Text Is set later in Accumulate()
 
@@ -288,8 +288,7 @@ namespace OpenGLForm {
         void Application_Idle(object sender, EventArgs e) {
             double milliseconds = ComputeTimeSlice();
             Accumulate(milliseconds);
-            //this.Invalidate();  // Causes GDI-blitted AnimTileSprite to be redrawn, but super-choppy (calling within Accumulate works OK though)
-            tvpc.Invalidate();  // Needed here for TVPC animation (calling it within Accumulate() does not work as desired)
+            tvpc.Invalidate();  // Causes TVPC redraw (seems like we would want once per tvpc.frame update, but see below...)
         }
 
         private double ComputeTimeSlice() {
@@ -300,71 +299,64 @@ namespace OpenGLForm {
             return timeslice;
         }
 
-        // The animation loop (variables and methods) here should be program-global
-        // (I see no utility in having differently-synched animation loops in different TVPCs)
-        // We could certainly desire that the "current frame" for a particular ITileSprite might be different, however...
-        // 
-        // Perhaps the rest of these (variables and methods) should be moved somewhere other than Form1.cs
-        // (this.frame was moved to tvpc.frame)
         double    accum_ms    = 0;
         int       idleCounter = 0;  // Counts number of Accumulate() calls since last tick
-        int       num_ticks   = 0;
+        int       num_quanta  = 0;
 
-        const int cycle_period = 6000;   // Number of milliseconds per cycle of animation frames
-        const int periodicity  = 24;     // This should be the Least_Common_Multiple of all distinct (ITileSprite.num_frames) values
-        const int tick_time    = cycle_period / periodicity;  // M / N --> N animation updates per M milliseconds
+        const int cycle_period_ms   = 6000;  // Number of milliseconds per cycle of animation frames
+        const int quanta_per_frame  = 8;     // N:1 speed relation between quanta:frame
+        const int frames_LCM_period = 24;    // This should be the Least_Common_Multiple of all distinct (ITileSprite.num_frames) values
+        const int quanta_period     = quanta_per_frame * frames_LCM_period;
+        const int ms_per_quanta     = cycle_period_ms / quanta_period;  // M / N --> N animation updates per M milliseconds
 
         // TODO: 
         // - Smooth-scrolling of the viewport, 
         // - Smooth-scrolling of an individual tile moving to an adjacent tile (later)
         // 
-        // The pixels-to-smooth-scroll per increment should be scrolled more than once per animation frame,
-        // so the scheme of time units will change to something like:
-        // 1 anim frame per "tick", and 1 n_pixels of smooth-scrolling scrolling per "quanta"
-        // 
         // For now, a prototype of smooth-scroll is hooked up to SHIFT+Left Arrow / SHIFT+Right Arrow
 
-        // TODO: 
-        // Consider means of the master 'frame' being supplemented by per-object current_frame counters, for some objects.
-        // 
-        // This is because there are various interesting use cases for 
-        // multiple same-sprite/sequence objects which one would want animated not-in-sync,
-        // though we still desire for many _types_ of objects that they animate in sync.
-        // 
-        // Hmmm...is it more suitable for such objects to have a distinct ITileSprite set, or to have a distinct frame counter?
-        // Need to write down the specific use cases which will be wanted...
-
+        int prev_frame = 0;
         private void Accumulate(double milliseconds) {
             idleCounter++;
             accum_ms += milliseconds;
-            if (accum_ms >= tick_time) {
-                // 1 anim frame per "tick"
-                num_ticks++;
-                tvpc.frame = num_ticks % periodicity;
+            if (accum_ms < ms_per_quanta) { return; }
 
-                // First attempt at a smooth-scroll mode:
-                if (x_pixel_shift != 0) {
-                    int n_pixels   = 4;  // n_pixels per smooth scroll increment
-                    int offset     = (x_pixel_shift > 0) ? +n_pixels : -n_pixels;
-                    int val        = this.tvpc.tile_grid_offset_x_px + offset;
-                    x_pixel_shift -= offset;
+            // We need multiple animation rates (for the moment, two: quanta and frame)
+            // for updating the displayed image of AnimTileSprite instances
+            // on different (map or UI) layers of the TVPC:
+            num_quanta++;
+            tvpc.quanta = num_quanta;
+            tvpc.frame = (num_quanta / quanta_per_frame) % frames_LCM_period;
 
-                    // ...This code shows smooth-scrolling, but it is not right yet.
-                    //    The x_origin needs to change in concert with the tile_grid_offset_x_px...
-
-                    int min = -this.tvpc.tile_width_px;
-                    int max = +this.tvpc.tile_width_px;
-                    this.tvpc.tile_grid_offset_x_px = Utility.clamp(min, max, val);
-                    // Next redraw should have the tile grid offset by n_pixels in the indicated direction,
-                    // and again the next tick, until x_pixel_shift is decremented to zero...
-                }
-                this.Invalidate();  // Needful here, so that GDI-anim redraws occur
-                label1.Text = String.Format("AnimRate=({0} frames / {1} ms) -- Tick={2,4}, Frame={3,2}/{4,2} -- This Tick: {5,3} ms, with {6,3} Idle events",
-                                            periodicity, cycle_period, num_ticks, tvpc.frame, periodicity, (int) accum_ms, idleCounter);
-
-                idleCounter = 0;
-                accum_ms -= tick_time;
+            //tvpc.Invalidate();  // For OpenTK redraw -- strangely, if called here, we seem to not get Idle events unless mouse activity???
+            if (prev_frame != tvpc.frame) {
+                this.Invalidate();  // Cause GDI+ redraw upon frame update (gets choppy if called too-frequently)
+                prev_frame = tvpc.frame;
             }
+
+            /*
+            // First attempt at a smooth-scroll mode:
+            if (x_pixel_shift != 0) {
+                int n_pixels   = 4;  // n_pixels per smooth scroll increment
+                int offset     = (x_pixel_shift > 0) ? +n_pixels : -n_pixels;
+                int val        = this.tvpc.tile_grid_offset_x_px + offset;
+                x_pixel_shift -= offset;
+
+                // ...This code shows smooth-scrolling, but it is not right yet.
+                //    The x_origin needs to change in concert with the tile_grid_offset_x_px...
+
+                int min = -this.tvpc.tile_width_px;
+                int max = +this.tvpc.tile_width_px;
+                this.tvpc.tile_grid_offset_x_px = Utility.clamp(min, max, val);
+                // Next redraw should have the tile grid offset by n_pixels in the indicated direction,
+                // and again the next tick, until x_pixel_shift is decremented to zero...
+            }
+            */
+            label1.Text = String.Format("AnimRate:  ({0} frames == {1} quanta) / {2} ms\n  Q={3,4}, Frame={4,2}/{5,2} -- This Tick: {6,3} ms, with {7,3} Idle events",
+                                        frames_LCM_period, quanta_period, cycle_period_ms,
+                                        tvpc.quanta, tvpc.frame, frames_LCM_period, (int) accum_ms, idleCounter);
+            idleCounter = 0;
+            accum_ms -= ms_per_quanta;
         } // Accumulate()
 
         private void OnPaint(object sender, PaintEventArgs ee) {
@@ -378,10 +370,13 @@ namespace OpenGLForm {
             AnimTileSprite   ani = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;
-            int x2 = 10 + 32 + 10;             // to the right of the first tile
-            int y1 = 512 + 10 + 10 + 13 + 10;  // below the TVPC
-            ani.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate an animated tile via GDI
-            spr.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);
+            int x2 = 10 + 32 + 10;                 // to the right of the first tile
+            int y1 = 512 + 10 + 5 + 13 + 13 + 10;  // below the TVPC
+            // Note that these will both be updated at 'frame' speed
+            // (No need for "marching ants" via GDI+, and GDI+ rendering 
+            // gets choppy when updated at much faster than 'frame' speed)
+            ani.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate an animated tile via GDI+
+            spr.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate transparency via GDI+
 
         } // Form1.OnPaint()
 

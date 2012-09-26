@@ -14,7 +14,8 @@ public class TVPC : OpenTK.GLControl {
     public int tile_height_px;  // Height to render a single tile, in pixels
 
     private bool loaded;  // Set in OnLoad()
-    public  int  frame = 0;  // Current animation frame.  Should likely be program-wide, rather than per-TVPC
+    public  int  quanta = 0;  // Current animation frame for max-speed UI elements, such as "marching ants" selections
+    public  int  frame  = 0;  // Current animation frame for map tiles
 
     public TilingModes      tiling_mode;
     public SimpleMapV1      map { get; private set; }
@@ -249,7 +250,7 @@ public class TVPC : OpenTK.GLControl {
         return true;  // The specified coordinates were set, without adjustment
     } // set_center()
 
-    public void Render(int frame) {
+    public void Render() {
         if (this.Parent == null) { return; }  // Avoid rendering if not in a Form...is this check needful?
         GL.ClearColor(Color.Green);  // This color will appear on off-map regions, and any between-tiles padding pixels
 
@@ -276,7 +277,7 @@ public class TVPC : OpenTK.GLControl {
                 foreach (int LL in MapLayers.MapRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.map.contents_at_LXY(LL, map_xx, map_yy);
                     if (sp != null) {
-                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(frame) );
+                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.frame) );
                     }
                 } // foreach(LL)
 
@@ -285,7 +286,7 @@ public class TVPC : OpenTK.GLControl {
                 foreach (int LL in ViewPortLayers.ViewPortRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.contents_at_LXY(LL, view_xx, view_yy);
                     if (sp != null) {
-                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(frame) );
+                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.quanta) );
                     }
                 } // foreach(LL)
 
@@ -358,7 +359,7 @@ public class TVPC : OpenTK.GLControl {
 
         GL.MatrixMode(MatrixMode.Modelview);    // Why MatrixMode.Modelview here, and .Projection in SetupViewport() ?
         GL.LoadIdentity();
-        this.Render(frame);
+        this.Render();
 
         GL.Flush();
         this.SwapBuffers();
