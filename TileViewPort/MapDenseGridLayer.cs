@@ -13,8 +13,8 @@ using System.Text;
 
         public MapDenseGridLayer(int ww, int hh, int[] contents)
         {
-            if ((ww < 1) || (ww > GridUtility.max_width )) { throw new ArgumentException("invalid width"); }
-            if ((hh < 1) || (hh > GridUtility.max_height)) { throw new ArgumentException("invalid height"); }
+            if ((ww < 1) || (ww > GridUtility2D.max_width )) { throw new ArgumentException("invalid width"); }
+            if ((hh < 1) || (hh > GridUtility2D.max_height)) { throw new ArgumentException("invalid height"); }
             width  = ww;
             height = hh;
 
@@ -32,7 +32,7 @@ using System.Text;
             {
                 for (int xx = min_x(); xx <= max_x(); xx++)
                 {
-                    int ii = GridUtility.indexForXYW(xx, yy, width);
+                    int ii = GridUtility2D.indexForXYW(xx, yy, width);
                     grid[ii] = contents[ii];
                 } // for (xx)
             } // for (yy)
@@ -45,7 +45,7 @@ using System.Text;
             if (yy < min_y()) { return 0; }
             if (yy > max_y()) { return 0; }
 
-            int ii = GridUtility.indexForXYW(xx, yy, width);
+            int ii = GridUtility2D.indexForXYW(xx, yy, width);
             return grid[ii];
         } // contents_at_XY()
 
@@ -56,7 +56,7 @@ using System.Text;
             if (yy < min_y()) { return 0; }
             if (yy > max_y()) { return 0; }
 
-            int ii = GridUtility.indexForXYW(xx, yy, width);
+            int ii = GridUtility2D.indexForXYW(xx, yy, width);
             grid[ii] = new_contents;
             return grid[ii];  // Return what was set
         } // set_contents_at_XY()

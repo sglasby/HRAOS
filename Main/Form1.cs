@@ -13,7 +13,8 @@ namespace OpenGLForm {
         Stopwatch   sw = new Stopwatch(); // available to all event handlers
 
         TileSheet   ts;
-        TileSheet   ui_ts;
+        //TileSheet   reticle_single_file_ts;
+        TileSheet   reticle_four_files_ts;
         TileSheet   f1234;
         TileSheet   wp_ts;
         TileSheet   LF;
@@ -79,13 +80,23 @@ namespace OpenGLForm {
             // code has been moved here, in a method we set up to be called upon the 'Shown' event
             // (which is fired upon the first display of this Form).
 
-            ts = new TileSheet(@"Main/U4.B_enhanced-32x32.png", 16, 16);  // causes GL textures to be loaded, needs some GL setup prior...
-            f1234 = new TileSheet(@"Main/example_all_facings.4_frames.intra_1.png", 4, 9, 32, 32, 1, 1, 1, 1);
-            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.png", 4, 4);
-            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.png", 4, 4);
-            //ui_ts = new TileSheet(@"Main/bright_marquee.frame_1.alpha.2.png", 4, 4);
-            ui_ts = new TileSheet(@"Main/bright_marquee.frame_1234.png", 4, 1);
-            wp_ts = new TileSheet(@"Main/whirlpool_bright.png", 4, 1);
+            //ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png");  // causes GL textures to be loaded, needs some GL setup prior...
+            ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png", @"Main/U4.B_enhanced-32x32.png");  // Testing multi-sheet StaticTileSprite setup...
+
+            f1234 = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, @"Main/example_all_facings.4_frames.intra_1.png");
+
+            //reticle_single_file_ts = new TileSheet(4, 1, @"Main/bright_marquee.frame_1234.png");
+            reticle_four_files_ts  = new TileSheet(4, 4,
+                            @"Main/bright_marquee.frame_1.png",
+                            @"Main/bright_marquee.frame_2.png",
+                            @"Main/bright_marquee.frame_3.png",
+                            @"Main/bright_marquee.frame_4.png");  // Test the params filenames[] invocation of the constructor...
+
+            wp_ts = new TileSheet(4, 1, @"Main/whirlpool_bright.png");
+
+            //string[] empty_file_names_list = { };
+            //TileSheet null_filenames_ts       = new TileSheet(4, 4, null                 );  // Will throw an exception
+            //TileSheet empty_filenames_list_ts = new TileSheet(4, 4, empty_file_names_list);  // Will throw an exception
 
             // TODO: 
             // After setting up all these AnimTileSprite instances, the utility is clear for
@@ -101,10 +112,10 @@ namespace OpenGLForm {
 
             AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, 0, 1, 2, 3);
 
-            LF = new TileSheet(@"Main/lava.wave_down.speed_4.frames_8.png", 8, 1);  // LF == LavaFlow
+            LF = new TileSheet(8, 1, @"Main/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
             AnimTileSprite lava_flow = new AnimTileSprite(LF, 0, 1, 2, 3, 4, 5, 6, 7);
 
-            // TileSheet TW = new TileSheet(@"Main/example_wave_test.intra_1.png", 1, 9);  // Will need WaveTileSprite to support this...
+            // TileSheet TW = new TileSheet(1, 9, @"Main/example_wave_test.intra_1.png");  // Will need WaveTileSprite to support this...
 
             int[] path_rect_5x4 = new int[]
             { // 5 = grass, 7 = trees, 58 = boulder
@@ -151,10 +162,8 @@ namespace OpenGLForm {
             tvpc.set_center(map, 2, 2);
 
             // Add some elements to the Beings layer of the Map:  // TODO: Still using hard-coded Sprite ID values here...
-            map.layers[MapLayers.Beings].set_contents_at_XY( 8,  7, 21);  // Horse
-
-            map.layers[MapLayers.Beings].set_contents_at_XY( 8,  7, 21);  // Horse
-            map.layers[MapLayers.Beings].set_contents_at_XY( 4, 15, 21);  // Horse
+            map.layers[MapLayers.Beings].set_contents_at_XY( 8,  7, 256+21);  // Horse
+            map.layers[MapLayers.Beings].set_contents_at_XY( 4, 15, 256+21);  // Horse
             map.layers[MapLayers.Beings].set_contents_at_XY( 8, 20, 33);  // Wizard
             map.layers[MapLayers.Beings].set_contents_at_XY( 3, 25, 70);  // Force field
             map.layers[MapLayers.Beings].set_contents_at_XY(10, 30, 29);  // Stair down
@@ -174,7 +183,8 @@ namespace OpenGLForm {
             // Add some elements to the UI_elements layer of the TileViewPort:
 
             //int reticle = ui_ts[3, 3].ID;  // avoiding hard-coding Sprite ID 272
-            AnimTileSprite anim_reticle = new AnimTileSprite(ui_ts, 0, 1, 2, 3);
+            //AnimTileSprite anim_reticle = new AnimTileSprite(reticle_single_file_ts, 0, 1, 2, 3);
+            AnimTileSprite anim_reticle = new AnimTileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
             int reticle = anim_reticle.ID;
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
@@ -352,9 +362,9 @@ namespace OpenGLForm {
                 // and again the next tick, until x_pixel_shift is decremented to zero...
             }
             */
-            label1.Text = String.Format("AnimRate:  ({0} frames == {1} quanta) / {2} ms\n  Q={3,4}, Frame={4,2}/{5,2} -- This Tick: {6,3} ms, with {7,3} Idle events",
+            label1.Text = String.Format("AnimRate:  ({0} frames == {1} quanta) / {2} ms\n  Q={3,4} ({4} Q/frame), Frame={5,2}/{6,2} -- This Tick: {7,3} ms, with {8,3} Idle events",
                                         frames_LCM_period, quanta_period, cycle_period_ms,
-                                        tvpc.quanta, tvpc.frame, frames_LCM_period, (int) accum_ms, idleCounter);
+                                        tvpc.quanta, quanta_per_frame, tvpc.frame, frames_LCM_period, (int) accum_ms, idleCounter);
             idleCounter = 0;
             accum_ms -= ms_per_quanta;
         } // Accumulate()
@@ -365,8 +375,9 @@ namespace OpenGLForm {
             // but it is nice to have the capability.
 
             Graphics         gg  = this.CreateGraphics();
-            //StaticTileSprite spr = ui_ts[0, 0];  // 3,3 on the 4x4 marquee sheet
-            AnimTileSprite   spr = new AnimTileSprite(ui_ts, 0, 1, 2, 3);
+            StaticTileSprite sta = ts[256+21];  // testing horse from sheet 2 of multi-bitmap TileSheet
+            //AnimTileSprite spr = new AnimTileSprite(reticle_single_file_ts, 0, 1, 2, 3);
+            AnimTileSprite   spr = new AnimTileSprite(reticle_four_files_ts, 0+15, 16+15, 32+15, 48+15);  // Bottom right tile in each image in the stack
             AnimTileSprite   ani = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;
@@ -377,6 +388,7 @@ namespace OpenGLForm {
             // gets choppy when updated at much faster than 'frame' speed)
             ani.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate an animated tile via GDI+
             spr.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate transparency via GDI+
+            sta.GDI_Draw_Tile(gg, x2, y1, null);  // Hmmm...wrong-facing horse, is the index off for GDI_Draw_Tile() vs blit_square_tile() ???
 
         } // Form1.OnPaint()
 

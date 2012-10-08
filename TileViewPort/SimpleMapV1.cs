@@ -73,8 +73,8 @@ public class SimpleMapV1
 
     public SimpleMapV1(int ww, int hh, TileSheet ts)
     {
-        if ((ww < 1) || (ww > GridUtility.max_width )) { throw new ArgumentException("invalid width"); }
-        if ((hh < 1) || (hh > GridUtility.max_height)) { throw new ArgumentException("invalid height"); }
+        if ((ww < 1) || (ww > GridUtility2D.max_width )) { throw new ArgumentException("invalid width"); }
+        if ((hh < 1) || (hh > GridUtility2D.max_height)) { throw new ArgumentException("invalid height"); }
         if (ts == null) { throw new ArgumentException("invalid tilesheet"); }
 
         width  = ww;

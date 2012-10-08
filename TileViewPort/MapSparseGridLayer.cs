@@ -10,8 +10,8 @@ class MapSparseGridLayer : IGridIterable {
     private Dictionary<int, int> grid_dict;
 
     public MapSparseGridLayer(int ww, int hh, Dictionary<int, int> contents) {
-        if ((ww < 1) || (ww > GridUtility.max_width )) { throw new ArgumentException("invalid width"); }
-        if ((hh < 1) || (hh > GridUtility.max_height)) { throw new ArgumentException("invalid height"); }
+        if ((ww < 1) || (ww > GridUtility2D.max_width )) { throw new ArgumentException("invalid width"); }
+        if ((hh < 1) || (hh > GridUtility2D.max_height)) { throw new ArgumentException("invalid height"); }
         width = ww;
         height = hh;
 
@@ -37,7 +37,7 @@ class MapSparseGridLayer : IGridIterable {
         if (yy < min_y()) { return 0; }
         if (yy > max_y()) { return 0; }
 
-        int XY_key   = (yy * GridUtility.max_width) + xx;
+        int XY_key   = (yy * GridUtility2D.max_width) + xx;
         int contents = 0;
         grid_dict.TryGetValue(XY_key, out contents);
         return contents;
@@ -49,7 +49,7 @@ class MapSparseGridLayer : IGridIterable {
         if (yy < min_y()) { return 0; }
         if (yy > max_y()) { return 0; }
 
-        int XY_key        = (yy * GridUtility.max_width) + xx;
+        int XY_key        = (yy * GridUtility2D.max_width) + xx;
         grid_dict[XY_key] = new_contents;
         return grid_dict[XY_key];  // Return what was set
     } // set_contents_at_XY()

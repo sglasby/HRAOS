@@ -10,17 +10,15 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
     public int    ID  { get; private set; }
     public string tag { get { return String.Format("{0}-{1}", ObjectRegistrar.Sprites.tag_prefix, ID); } }  // TODO: Probably want a different tag prefix...
 
-    TileSheet _tile_sheet { get; set; }
-    Image     _image      { get { return _tile_sheet.sheet; } }
-
-    public int num_frames { get; private set; }
-    StaticTileSprite[] frame_sequence { get; set; }
+    private TileSheet          _tile_sheet    { get; set; }
+    public  int                num_frames     { get; private set; }
+    private StaticTileSprite[] frame_sequence { get; set; }
 
     //Rectangle _rect       { get; set; }
     //int       _texture    { get; set; }
 
     public TileSheet tile_sheet(int frame) { return _tile_sheet; }
-    public Image     image     (int frame) { return _image;      }
+    public Image     image     (int frame) { int ff = frame % num_frames; return frame_sequence[ff].image(ff);   }
     public Rectangle rect      (int frame) { int ff = frame % num_frames; return frame_sequence[ff].rect(ff);    }
     public int       texture   (int frame) { int ff = frame % num_frames; return frame_sequence[ff].texture(ff); }
 
@@ -76,7 +74,7 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
         // Draw the region this.rect of the image onto gg at xx,yy, with no scaling
         Rectangle rr = this.rect(frame);
         Rectangle destRect = new Rectangle(xx, yy, rr.Width, rr.Height);
-        gg.DrawImage(_image,
+        gg.DrawImage(image(frame),
                      new Rectangle(xx, yy, rr.Width, rr.Height),
                      rr.X, rr.Y, rr.Width, rr.Height,
                      GraphicsUnit.Pixel, attrib);

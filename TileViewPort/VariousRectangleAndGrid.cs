@@ -6,8 +6,8 @@ public class DenseGrid : IGridIterable {
     private int[] grid;
 
     public DenseGrid(int ww, int hh, int fill) {
-        if ((ww < 1) || (ww > GridUtility.max_width )) { throw new ArgumentException("invalid width");  }
-        if ((hh < 1) || (hh > GridUtility.max_height)) { throw new ArgumentException("invalid height"); }
+        if ((ww < 1) || (ww > GridUtility2D.max_width )) { throw new ArgumentException("invalid width");  }
+        if ((hh < 1) || (hh > GridUtility2D.max_height)) { throw new ArgumentException("invalid height"); }
         width  = ww;
         height = hh;
 
@@ -40,7 +40,7 @@ public class DenseGrid : IGridIterable {
         if (yy < min_y()) { return 0; }
         if (yy > max_y()) { return 0; }
 
-        int ii = GridUtility.indexForXYW(xx, yy, width);
+        int ii = GridUtility2D.indexForXYW(xx, yy, width);
         return grid[ii];
     } // contents_at_XY()
 
@@ -50,7 +50,7 @@ public class DenseGrid : IGridIterable {
         if (yy < min_y()) { return 0; }
         if (yy > max_y()) { return 0; }
 
-        int ii = GridUtility.indexForXYW(xx, yy, width);
+        int ii = GridUtility2D.indexForXYW(xx, yy, width);
         grid[ii] = new_contents;
         return grid[ii];  // Return what was set
     } // set_contents_at_XY()
@@ -109,20 +109,20 @@ public class DenseGrid : IGridIterable {
         int max_from_w = Math.Min(from_A.max_x(), from_x + blit_width);
         int max_to_w   = Math.Min(to_B.max_x(), to_x + blit_width);
         int max_width  = Math.Min(max_from_w, max_to_w);
-        blit_width = GridUtility.Clamp(blit_width, 1, max_width);
+        blit_width = GridUtility2D.Clamp(blit_width, 1, max_width);
 
         int max_from_h = Math.Min(from_A.max_y(), from_y + blit_height);
         int max_to_h   = Math.Min(to_B.max_y(), to_y + blit_height);
         int max_height = Math.Min(max_from_h, max_to_h);
-        blit_height = GridUtility.Clamp(blit_height, 1, max_height);
+        blit_height = GridUtility2D.Clamp(blit_height, 1, max_height);
 
         // Iterate over the cells of from_A, and copy non-blank cells onto to_B:
         for (int yy = 0; yy <= blit_height; yy++) {
             for (int xx = 0; xx <= blit_width; xx++) {
                 // To find the from/to blit coordinates,
                 // add in the x,y offsets for from_A and to_B:
-                int from_ii = GridUtility.indexForXYW(from_x + xx, from_y + yy, from_A.width);
-                int   to_ii = GridUtility.indexForXYW(to_x + xx, to_y + yy, to_B.width);
+                int from_ii = GridUtility2D.indexForXYW(from_x + xx, from_y + yy, from_A.width);
+                int   to_ii = GridUtility2D.indexForXYW(to_x + xx, to_y + yy, to_B.width);
 
                 int contents = from_A.contents_at_XY(from_x + xx, from_y + yy);
                 if (contents != 0) {

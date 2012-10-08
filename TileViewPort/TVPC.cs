@@ -51,11 +51,11 @@ public class TVPC : OpenTK.GLControl {
     private int Y_origin;
     public int x_origin {
          get { return X_origin; }
-         set { X_origin = GridUtility.Clamp(value, min_x_offset, max_x_offset); }
+         set { X_origin = GridUtility2D.Clamp(value, min_x_offset, max_x_offset); }
     }
     public int y_origin {
          get { return Y_origin; }
-         set { Y_origin = GridUtility.Clamp(value, min_y_offset, max_y_offset); }
+         set { Y_origin = GridUtility2D.Clamp(value, min_y_offset, max_y_offset); }
     }
 
     public int center_x { get { return (width_in_tiles  / 2); } }
