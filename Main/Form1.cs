@@ -16,7 +16,10 @@ namespace OpenGLForm {
         //TileSheet   reticle_single_file_ts;
         TileSheet   reticle_four_files_ts;
         TileSheet   f1234;
+        TileSheet   f1234_stack;
         TileSheet   wp_ts;
+        TileSheet   wp_stack_ts;
+        TileSheet   creatures_stack;
         TileSheet   LF;
 
         SimpleMapV1 map;
@@ -83,7 +86,12 @@ namespace OpenGLForm {
             //ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png");  // causes GL textures to be loaded, needs some GL setup prior...
             ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png", @"Main/U4.B_enhanced-32x32.png");  // Testing multi-sheet StaticTileSprite setup...
 
-            f1234 = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, @"Main/example_all_facings.4_frames.intra_1.png");
+            f1234       = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, @"Main/example_all_facings.4_frames.intra_1.png");
+            f1234_stack = new TileSheet(1, 9, 32, 32, 1, 1, 1, 1,
+                @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_1.png",
+                @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_2.png",
+                @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_3.png",
+                @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_4.png");
 
             //reticle_single_file_ts = new TileSheet(4, 1, @"Main/bright_marquee.frame_1234.png");
             reticle_four_files_ts  = new TileSheet(4, 4,
@@ -93,6 +101,18 @@ namespace OpenGLForm {
                             @"Main/bright_marquee.frame_4.png");  // Test the params filenames[] invocation of the constructor...
 
             wp_ts = new TileSheet(4, 1, @"Main/whirlpool_bright.png");
+
+            wp_stack_ts = new TileSheet(1, 1,
+                @"Main/tiles/whirlpool.stacked/whirlpool_1.png",
+                @"Main/tiles/whirlpool.stacked/whirlpool_2.png",
+                @"Main/tiles/whirlpool.stacked/whirlpool_3.png",
+                @"Main/tiles/whirlpool.stacked/whirlpool_4.png");
+
+            creatures_stack = new TileSheet(4, 7,
+                @"Main/tiles/creatures.stacked/creatures.frame_1.png",
+                @"Main/tiles/creatures.stacked/creatures.frame_2.png",
+                @"Main/tiles/creatures.stacked/creatures.frame_3.png",
+                @"Main/tiles/creatures.stacked/creatures.frame_4.png");
 
             //string[] empty_file_names_list = { };
             //TileSheet null_filenames_ts       = new TileSheet(4, 4, null                 );  // Will throw an exception
@@ -108,9 +128,14 @@ namespace OpenGLForm {
             // This illustrates why the master frame cycle need be the Least Common Multiple of (3,4) 
             // (or whatever other set of ITileSprite.num_frames values).
             AnimTileSprite count_ABC     = new AnimTileSprite(ts, ts[0, 6], ts[1, 6], ts[2, 6]);
-            AnimTileSprite count_1234    = new AnimTileSprite(f1234, f1234[0, 0], f1234[1, 0], f1234[2, 0], f1234[3, 0]);
+            // AnimTileSprite count_1234    = new AnimTileSprite(f1234, f1234[0, 0], f1234[1, 0], f1234[2, 0], f1234[3, 0]);
+            AnimTileSprite count_1234    = new AnimTileSprite(f1234_stack, 0, 9+0, 18+0, 27+0);  // Same as count_1234, but frames from 4 files
 
-            AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, 0, 1, 2, 3);
+            // AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, 0, 1, 2, 3);
+            AnimTileSprite whirlpool = new AnimTileSprite(wp_stack_ts, 0, 1, 2, 3);  // Save as from wp_ts, but using 4 image files in a stack
+
+            AnimTileSprite bat       = new AnimTileSprite(creatures_stack, (0*28) +1, (1*28) +1, (2*28) +1, (3*28) +1);
+            AnimTileSprite skel_mage = new AnimTileSprite(creatures_stack, (0*28)+21, (1*28)+21, (2*28)+21, (3*28)+21);
 
             LF = new TileSheet(8, 1, @"Main/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
             AnimTileSprite lava_flow = new AnimTileSprite(LF, 0, 1, 2, 3, 4, 5, 6, 7);
@@ -177,6 +202,9 @@ namespace OpenGLForm {
 
             map.layers[MapLayers.Beings].set_contents_at_XY(4, 1, count_ABC.ID);   // 3 frames (A,B,C)
             map.layers[MapLayers.Beings].set_contents_at_XY(5, 1, count_1234.ID);  // 4 frames (1,2,3,4)
+
+            map.layers[MapLayers.Beings].set_contents_at_XY(6, 6, bat.ID);
+            map.layers[MapLayers.Beings].set_contents_at_XY(4, 7, skel_mage.ID);
 
             map.layers[MapLayers.Beings].set_contents_at_XY(0, 0, whirlpool.ID);
 

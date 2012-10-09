@@ -191,14 +191,21 @@ public class TileSheet {
 
     public StaticTileSprite this[int xx_column, int yy_row] {
         get {
-            int tile_index = GridUtility2D.indexForXYW(xx_column, yy_row, this.width_tiles);
+            int tile_index = GridUtility3D.indexForXYZWH(xx_column, yy_row, 0, this.width_tiles, this.height_tiles);
+            if (tile_index < 0)         { return null; }
+            if (tile_index > max_index) { return null; }
             return this[tile_index];
-
-            //if (tile_index < 0)         { return null; }
-            //if (tile_index > max_index) { return null; }
-            //return tile_rects[tile_index];
         }
     } // indexer[column,row]
+
+    public StaticTileSprite this[int xx_column, int yy_row, int zz_sheet] {
+        get {
+            int tile_index = GridUtility3D.indexForXYZWH(xx_column, yy_row, zz_sheet, this.width_tiles, this.height_tiles);
+            if (tile_index < 0)         { return null; }
+            if (tile_index > max_index) { return null; }
+            return this[tile_index];
+        }
+    } // indexer[column,row,sheet]
 
     public Rectangle rect_for_tile(int ii) {
         int xx = GridUtility3D.XforIWH(ii, this.width_tiles, this.height_tiles);

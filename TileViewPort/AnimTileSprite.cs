@@ -40,6 +40,7 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
         frame_sequence = new StaticTileSprite[num_frames];
         for (int ii = 0; ii < num_frames; ii++) {
             int this_tile_index = frame_indexes[ii];
+            if (tile_sheet[this_tile_index] == null) { throw new Exception("AnimTileSprite(sh,frame_indexes) Got null StaticTileSprite in frame list"); }
             frame_sequence[ii]  = tile_sheet[this_tile_index];
         }
         this.ID = ObjectRegistrar.Sprites.register_obj_as(this, typeof(ITileSprite) );
@@ -54,6 +55,9 @@ public class AnimTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite 
         }
         if (anim_frames == null || anim_frames.Length == 0) {
             throw new ArgumentException("Got null or empty anim_frames array");
+        }
+        for (int ii = 0; ii < num_frames; ii++) {
+            if (anim_frames[ii] == null) { throw new Exception("AnimTileSprite(sh,anim_frames) Got null StaticTileSprite in frame list"); }
         }
         _tile_sheet    = tile_sheet;
         frame_sequence = anim_frames;

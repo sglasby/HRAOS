@@ -70,6 +70,42 @@
     <Content Include="Main\lava.wave_down.speed_4.frames_8.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Main\tiles\creatures.stacked\creatures.frame_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\creatures.stacked\creatures.frame_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\creatures.stacked\creatures.frame_3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\creatures.stacked\creatures.frame_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Main\U4.B_enhanced-32x32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

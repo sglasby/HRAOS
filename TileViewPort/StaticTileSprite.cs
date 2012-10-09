@@ -23,11 +23,11 @@ public class StaticTileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprit
     public int       texture   (int frame) { return _texture;    }
 
     public StaticTileSprite(TileSheet tile_sheet, int which_sheet, int OpenGL_texture_id, Rectangle rect) {
-        _tile_sheet = tile_sheet;
+        _tile_sheet  = tile_sheet;
         _which_sheet = which_sheet;
-        _texture    = OpenGL_texture_id;
-        _rect       = rect;
-        this.ID     = ObjectRegistrar.Sprites.register_obj_as(this, typeof(ITileSprite) );
+        _texture     = OpenGL_texture_id;
+        _rect        = rect;
+        this.ID      = ObjectRegistrar.Sprites.register_obj_as(this, typeof(ITileSprite) );
     } // TileSprite(sh,tex,Rectangle)
 
     public StaticTileSprite(TileSheet tile_sheet, int which_sheet, int OpenGL_texture_id, int xx, int yy, int ww, int hh) :
