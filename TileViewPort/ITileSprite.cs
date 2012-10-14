@@ -2,13 +2,13 @@
 using System.Drawing.Imaging;
 
 interface ITileSprite {
-    int num_frames { get; }
+    TileSheet   sheet      { get; }
+    int         num_frames { get; }
 
-    TileSheet tile_sheet(int frame);
-    Image     image(int frame);
-    Rectangle rect(int frame);
-    int       texture(int frame);
+    Bitmap[]    bitmap     { get; }
+    Rectangle[] rect       { get; }
+    int[]       texture    { get; }
 
+    void blit_square_tile(int pixel_xx, int pixel_yy, int frame);
     void GDI_Draw_Tile(Graphics gg, int xx, int yy, ImageAttributes attrib, int frame);
 } // interface
-

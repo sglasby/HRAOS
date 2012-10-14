@@ -58,6 +58,12 @@
     <Content Include="Main\bright_marquee.frame_4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Main\cursors\cursor_40x40_blink.stacked\cursor_40x40.frame_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Main\cursors\cursor_40x40_blink.stacked\cursor_40x40.frame_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Main\example_all_facings.4_frames.intra_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -118,18 +124,18 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Main\Program.cs" />
-    <Compile Include="TileViewPort\AnimTileSprite.cs" />
+    <Compile Include="TileViewPort\GridUtility.cs" />
     <Compile Include="TileViewPort\HaxObj.cs" />
     <Compile Include="TileViewPort\ITileSprite.cs" />
     <Compile Include="TileViewPort\MapCompositedLayer.cs" />
     <Compile Include="TileViewPort\MapDenseBitLayer.cs" />
     <Compile Include="TileViewPort\MapDenseGridLayer.cs" />
     <Compile Include="TileViewPort\MapSparseGridLayer.cs" />
+    <Compile Include="TileViewPort\TileSheet.cs" />
+    <Compile Include="TileViewPort\TileSprite.cs" />
     <Compile Include="TileViewPort\ObjectRegistrar.cs" />
     <Compile Include="TileViewPort\Rect.cs" />
     <Compile Include="TileViewPort\SimpleMapV1.cs" />
-    <Compile Include="TileViewPort\StaticTileSprite.cs" />
-    <Compile Include="TileViewPort\TileSheet.cs" />
     <Compile Include="TileViewPort\TilingModes.cs" />
     <Compile Include="TileViewPort\TVPC.cs">
       <SubType>UserControl</SubType>

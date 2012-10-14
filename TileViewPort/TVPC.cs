@@ -257,7 +257,7 @@ public class TVPC : OpenTK.GLControl {
         // The various coordinates which are used:
         // ( view_xx,  view_yy) are viewport tile coordinates of the tile to render
         // (  map_xx,   map_xx) are      map tile coordinates of a map tile to render (or else, off-map)
-        // (pixel_xx, pixel_yy) are        pixel coordinates on screen for the (top left) origin of the tile to render
+        // (pixel_xx, pixel_yy) are         pixel coordinates on screen for the (top left) origin of the tile to render
         for (int view_yy = 0; view_yy < this.height_in_tiles; view_yy++) {
             for (int view_xx = 0; view_xx < this.width_in_tiles; view_xx++) {
                 int map_xx = this.x_origin + view_xx;
@@ -277,7 +277,8 @@ public class TVPC : OpenTK.GLControl {
                 foreach (int LL in MapLayers.MapRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.map.contents_at_LXY(LL, map_xx, map_yy);
                     if (sp != null) {
-                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.frame) );
+                        sp.blit_square_tile(pixel_xx, pixel_yy, this.frame);
+                        // this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.frame) );  // OLD
                     }
                 } // foreach(LL)
 
@@ -286,7 +287,8 @@ public class TVPC : OpenTK.GLControl {
                 foreach (int LL in ViewPortLayers.ViewPortRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.contents_at_LXY(LL, view_xx, view_yy);
                     if (sp != null) {
-                        this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.quanta) );
+                        sp.blit_square_tile(pixel_xx, pixel_yy, this.quanta);  // Note: Thus _all_ tiles in ViewPortLayers are rendered at the faster 'quanta' rate...
+                        //this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.quanta) );  // OLD
                     }
                 } // foreach(LL)
 
@@ -294,35 +296,35 @@ public class TVPC : OpenTK.GLControl {
         } //  for(view_yy)
     } // Render()
 
-    public void blit_square_tile(int pixel_xx, int pixel_yy, int texture_id) {
-        // Define OpenGL vertex coordinates for a square centered on the origin (0.0, 0.0)
-        double LL = -(this.tile_width_px  / 2);
-        double RR = +(this.tile_width_px  / 2);
-        double TT = -(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
-        double BB = +(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
+    //public void blit_square_tile(int pixel_xx, int pixel_yy, int texture_id) {
+    //    // Define OpenGL vertex coordinates for a square centered on the origin (0.0, 0.0)
+    //    double LL = -(this.tile_width_px  / 2);
+    //    double RR = +(this.tile_width_px  / 2);
+    //    double TT = -(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
+    //    double BB = +(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
 
-        double HALF_TILE_WW = this.tile_width_px  / 2;
-        double HALF_TILE_HH = this.tile_height_px / 2;
-        const double angle = 0.0;
+    //    double HALF_TILE_WW = this.tile_width_px  / 2;
+    //    double HALF_TILE_HH = this.tile_height_px / 2;
+    //    const double angle = 0.0;
 
-        GL.PushMatrix();
-        GL.Translate((pixel_xx + HALF_TILE_WW), (pixel_yy + HALF_TILE_HH), 0);
-        GL.Rotate(angle, 0.0, 0.0, -1.0);
+    //    GL.PushMatrix();
+    //    GL.Translate((pixel_xx + HALF_TILE_WW), (pixel_yy + HALF_TILE_HH), 0);
+    //    GL.Rotate(angle, 0.0, 0.0, -1.0);
 
-        GL.BindTexture(TextureTarget.Texture2D, texture_id);
-        TileSheet.Check_for_GL_error("In blit_square_tile() after calling GL.BindTexture()");
+    //    GL.BindTexture(TextureTarget.Texture2D, texture_id);
+    //    TileSheet.Check_for_GL_error("In blit_square_tile() after calling GL.BindTexture()");
 
-        GL.Begin(BeginMode.Quads);
-        {
-            GL.TexCoord2(0.0f, 1.0f);  GL.Vertex2(LL, BB);  // Texture, Vertex coordinates for Bottom Left
-            GL.TexCoord2(1.0f, 1.0f);  GL.Vertex2(RR, BB);  // Texture, Vertex coordinates for Bottom Right
-            GL.TexCoord2(1.0f, 0.0f);  GL.Vertex2(RR, TT);  // Texture, Vertex coordinates for Top Right
-            GL.TexCoord2(0.0f, 0.0f);  GL.Vertex2(LL, TT);  // Texture, Vertex coordinates for Top Left
-        }
-        GL.End();
+    //    GL.Begin(BeginMode.Quads);
+    //    {
+    //        GL.TexCoord2(0.0f, 1.0f);  GL.Vertex2(LL, BB);  // Texture, Vertex coordinates for Bottom Left
+    //        GL.TexCoord2(1.0f, 1.0f);  GL.Vertex2(RR, BB);  // Texture, Vertex coordinates for Bottom Right
+    //        GL.TexCoord2(1.0f, 0.0f);  GL.Vertex2(RR, TT);  // Texture, Vertex coordinates for Top Right
+    //        GL.TexCoord2(0.0f, 0.0f);  GL.Vertex2(LL, TT);  // Texture, Vertex coordinates for Top Left
+    //    }
+    //    GL.End();
 
-        GL.PopMatrix();
-    } // blit_square_tile()
+    //    GL.PopMatrix();
+    //} // blit_square_tile()
 
 
     private void OnLoad(object sender, EventArgs e) {
@@ -336,7 +338,7 @@ public class TVPC : OpenTK.GLControl {
         GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
         GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-        TileSheet.Check_for_GL_error("In TVPC.OnLoad() after calling GL.Hint()");
+        TileSprite.Check_for_GL_error("In TVPC.OnLoad() after calling GL.Hint()");
 
         loaded = true;
     } // OnLoad()
@@ -348,7 +350,7 @@ public class TVPC : OpenTK.GLControl {
         GL.LoadIdentity();
         GL.Ortho(0, this.Width, this.Height, 0, 0, 1);  // OpenGL origin coordinate (0,0) is at bottom left; we want origin at top left
         GL.Viewport(0, 0, this.Width, this.Height);     // Use all of the GLControl area for the GL Viewport
-        TileSheet.Check_for_GL_error("In TVPC.SetupViewport() after calling GL.Viewport()");
+        TileSprite.Check_for_GL_error("In TVPC.SetupViewport() after calling GL.Viewport()");
     } // SetupViewport()
 
     private void OnPaint(object sender, PaintEventArgs e) {

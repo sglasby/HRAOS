@@ -7,6 +7,7 @@ public class ObjectRegistrar {
     // The global registrars:
     public static ObjectRegistrar HaxObjs;
     public static ObjectRegistrar Sprites;
+    public static ObjectRegistrar NEW_TileSheets;
 
     Type registered_type;
     public  string tag_prefix { get; private set; }
@@ -17,8 +18,9 @@ public class ObjectRegistrar {
 
     static ObjectRegistrar() {
         // Static class constructor:
-        HaxObjs = new ObjectRegistrar(typeof(Object), "Obj");
-        Sprites = new ObjectRegistrar(typeof(ITileSprite), "Spr");
+        HaxObjs        = new ObjectRegistrar(typeof(Object),          "Obj");
+        Sprites        = new ObjectRegistrar(typeof(ITileSprite), "Spr");
+        NEW_TileSheets = new ObjectRegistrar(typeof(TileSheet),   "TileSheet");
     } // Initialize()
 
     public ObjectRegistrar(Type type_arg, string prefix_arg) {

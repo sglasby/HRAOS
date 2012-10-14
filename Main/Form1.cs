@@ -13,8 +13,10 @@ namespace OpenGLForm {
         Stopwatch   sw = new Stopwatch(); // available to all event handlers
 
         TileSheet   ts;
-        //TileSheet   reticle_single_file_ts;
+        //TileSheet reticle_single_file_ts;
         TileSheet   reticle_four_files_ts;
+        TileSheet   ts_cursor_blink_40x40;
+
         TileSheet   f1234;
         TileSheet   f1234_stack;
         TileSheet   wp_ts;
@@ -83,8 +85,7 @@ namespace OpenGLForm {
             // code has been moved here, in a method we set up to be called upon the 'Shown' event
             // (which is fired upon the first display of this Form).
 
-            //ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png");  // causes GL textures to be loaded, needs some GL setup prior...
-            ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png", @"Main/U4.B_enhanced-32x32.png");  // Testing multi-sheet StaticTileSprite setup...
+            ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png");
 
             f1234       = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, @"Main/example_all_facings.4_frames.intra_1.png");
             f1234_stack = new TileSheet(1, 9, 32, 32, 1, 1, 1, 1,
@@ -118,43 +119,42 @@ namespace OpenGLForm {
             //TileSheet null_filenames_ts       = new TileSheet(4, 4, null                 );  // Will throw an exception
             //TileSheet empty_filenames_list_ts = new TileSheet(4, 4, empty_file_names_list);  // Will throw an exception
 
-            // TODO: 
-            // After setting up all these AnimTileSprite instances, the utility is clear for
-            // various constructor overloads which infer the wanted StaticTileSprite IDs...
-            AnimTileSprite anim_blue_wiz = new AnimTileSprite(ts, 32, 33);  // Note the one-index constructor
-            AnimTileSprite anim_red_wiz  = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);  // Note the 2-index constructor
+            TileSprite anim_blue_wiz = new TileSprite(ts, 32, 33);
+            TileSprite anim_red_wiz  = new TileSprite(ts, 224, 225, 226, 227 );
 
             // Counters for 3 frames (A,B,C) and for 4 frames (1,2,3,4)
             // This illustrates why the master frame cycle need be the Least Common Multiple of (3,4) 
             // (or whatever other set of ITileSprite.num_frames values).
-            AnimTileSprite count_ABC     = new AnimTileSprite(ts, ts[0, 6], ts[1, 6], ts[2, 6]);
-            // AnimTileSprite count_1234    = new AnimTileSprite(f1234, f1234[0, 0], f1234[1, 0], f1234[2, 0], f1234[3, 0]);
-            AnimTileSprite count_1234    = new AnimTileSprite(f1234_stack, 0, 9+0, 18+0, 27+0);  // Same as count_1234, but frames from 4 files
+            TileSprite count_ABC     = new TileSprite(ts, 96, 97, 98);  //ts[0, 6], ts[1, 6], ts[2, 6]);
+            TileSprite count_1234    = new TileSprite(f1234_stack, 0, 9+0, 18+0, 27+0);  // Same as count_1234, but frames from 4 files
 
-            // AnimTileSprite whirlpool = new AnimTileSprite(wp_ts, 0, 1, 2, 3);
-            AnimTileSprite whirlpool = new AnimTileSprite(wp_stack_ts, 0, 1, 2, 3);  // Save as from wp_ts, but using 4 image files in a stack
+            // TileSprite whirlpool = new TileSprite(wp_ts, 0, 1, 2, 3);
+            TileSprite whirlpool = new TileSprite(wp_stack_ts, 0, 1, 2, 3);  // Save as from wp_ts, but using 4 image files in a stack
 
-            AnimTileSprite bat       = new AnimTileSprite(creatures_stack, (0*28) +1, (1*28) +1, (2*28) +1, (3*28) +1);
-            AnimTileSprite skel_mage = new AnimTileSprite(creatures_stack, (0*28)+21, (1*28)+21, (2*28)+21, (3*28)+21);
+            TileSprite bat       = new TileSprite(creatures_stack, (0*28) +1, (1*28) +1, (2*28) +1, (3*28) +1);
+            TileSprite skel_mage = new TileSprite(creatures_stack, (0*28)+21, (1*28)+21, (2*28)+21, (3*28)+21);
 
             LF = new TileSheet(8, 1, @"Main/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
-            AnimTileSprite lava_flow = new AnimTileSprite(LF, 0, 1, 2, 3, 4, 5, 6, 7);
+            TileSprite lava_flow = new TileSprite(LF, 0, 1, 2, 3, 4, 5, 6, 7);
 
+            // TODO: Support some manner of ITileSprite for "wave" sprites
             // TileSheet TW = new TileSheet(1, 9, @"Main/example_wave_test.intra_1.png");  // Will need WaveTileSprite to support this...
 
+            TileSprite grass   = new TileSprite(ts, 4);
+            TileSprite trees   = new TileSprite(ts, 6);
+            TileSprite boulder = new TileSprite(ts, 57);
             int[] path_rect_5x4 = new int[]
             { // 5 = grass, 7 = trees, 58 = boulder
-               58,  5,  5,  7,  5,
-                5,  5,  5,  7,  7,
-                7,  7,  7,  7,  0,
-                5,  5,  7,  5,  5,
+               boulder.ID, grass.ID, grass.ID, trees.ID, grass.ID,
+               grass.ID,   grass.ID, grass.ID, trees.ID, trees.ID,
+               trees.ID,   trees.ID, trees.ID, trees.ID, 0,         // 0 is a "hole in the map" for blitting / map composition purposes
+               grass.ID,   grass.ID, trees.ID, grass.ID, grass.ID,
             };
 
-            int lava_ID = ts[12, 4].ID;  // Lava
-            //DenseGrid map_16x64 = new DenseGrid(16, 64, lava_ID);  // StaticTileSprite lava
-            DenseGrid map_16x64 = new DenseGrid(16, 64, lava_flow.ID);  // AnimTileSprite flowing lava
+            DenseGrid map_16x64 = new DenseGrid(16, 64, lava_flow.ID);
 
-            DenseGrid flip_none = new DenseGrid(5, 4, path_rect_5x4);  // Test with width != height, the better to see the rotations and flips
+            // Blit a non-square grid onto the map, demonstrating the various possible rotations and flips:
+            DenseGrid flip_none = new DenseGrid(5, 4, path_rect_5x4);
             DenseGrid flip_we   = flip_none.Flip_WE();
             DenseGrid flip_ns   = flip_none.Flip_NS();
             DenseGrid flip_wens = flip_we.Flip_NS();
@@ -177,16 +177,20 @@ namespace OpenGLForm {
             map = new SimpleMapV1(16, 64, ts);
             map.AddTerrainRegion(map_16x64, 0, 0);
 
-            //tvp = new TileViewPort(this.tvp_control,
-            //    15, 15,
-            //    //ViewPortScrollingConstraint.EntireMap,
-            //    ScrollConstraint.CenterTile,
-            //    //ViewPortScrollingConstraint.EdgeCorner, 
-            //    map, 0, 0);
             tvpc.scroll_constraint = ScrollConstraint.CenterTile;
             tvpc.set_center(map, 2, 2);
 
-            // Add some elements to the Beings layer of the Map:  // TODO: Still using hard-coded Sprite ID values here...
+
+
+            // Add some elements to the Beings layer of the Map:
+            // BUG: (in demo data)
+            // The below are bare integers which do not correspond 
+            // to a constructed TileSprite; those display wrongly (confusion between object ID and OpenGL texture ID or somesuch?)
+            // The fix is merely to create TileSprite objects and use their .ID
+            // (This fossil is due to the TileSheet + TileSprite refactor; 
+            //  the sprites are no longer implicitly created and stored within the TileSheet)
+
+            /*
             map.layers[MapLayers.Beings].set_contents_at_XY( 8,  7, 256+21);  // Horse
             map.layers[MapLayers.Beings].set_contents_at_XY( 4, 15, 256+21);  // Horse
             map.layers[MapLayers.Beings].set_contents_at_XY( 8, 20, 33);  // Wizard
@@ -196,6 +200,7 @@ namespace OpenGLForm {
             map.layers[MapLayers.Beings].set_contents_at_XY( 6, 40, 45);  // Archer
             map.layers[MapLayers.Beings].set_contents_at_XY(12, 45, 23);  // Purple tiles
             map.layers[MapLayers.Beings].set_contents_at_XY( 5, 50, 19);  // Ship
+            */
 
             map.layers[MapLayers.Beings].set_contents_at_XY(2, 1, anim_blue_wiz.ID);  // Blue Wizard, animated (2 frames)
             map.layers[MapLayers.Beings].set_contents_at_XY(3, 3, anim_red_wiz.ID);   // Red  Wizard, animated (4 frames)
@@ -208,12 +213,23 @@ namespace OpenGLForm {
 
             map.layers[MapLayers.Beings].set_contents_at_XY(0, 0, whirlpool.ID);
 
+
+
             // Add some elements to the UI_elements layer of the TileViewPort:
 
-            //int reticle = ui_ts[3, 3].ID;  // avoiding hard-coding Sprite ID 272
-            //AnimTileSprite anim_reticle = new AnimTileSprite(reticle_single_file_ts, 0, 1, 2, 3);
-            AnimTileSprite anim_reticle = new AnimTileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
+            //TileSprite anim_reticle = new TileSprite(reticle_single_file_ts, 0, 1, 2, 3);
+            TileSprite anim_reticle = new TileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
             int reticle = anim_reticle.ID;
+
+            // // An attempt to put up a better cursor...
+            //ts_cursor_blink_40x40 = new TileSheet(1, 1, 
+            //    @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_1.png",
+            //    @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_2.png");
+            //TileSprite large_cursor = new TileSprite(ts_cursor_blink_40x40, 0, 1);
+            //int LC = large_cursor.ID;  // does not render quite right yet: (no offset, seems cut off at 32x32 boundary)
+            // 
+            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, LC);  // Center
+
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             reticle);  // NE
@@ -402,11 +418,10 @@ namespace OpenGLForm {
             // Not sure how often such a thing will be wanted for UI purposes, 
             // but it is nice to have the capability.
 
-            Graphics         gg  = this.CreateGraphics();
-            StaticTileSprite sta = ts[256+21];  // testing horse from sheet 2 of multi-bitmap TileSheet
-            //AnimTileSprite spr = new AnimTileSprite(reticle_single_file_ts, 0, 1, 2, 3);
-            AnimTileSprite   spr = new AnimTileSprite(reticle_four_files_ts, 0+15, 16+15, 32+15, 48+15);  // Bottom right tile in each image in the stack
-            AnimTileSprite   ani = new AnimTileSprite(ts, ts[0, 14], ts[1, 14], ts[2, 14], ts[3, 14]);
+            Graphics   gg  = this.CreateGraphics();
+            TileSprite sta =  new TileSprite(ts, 21);
+            TileSprite spr = new TileSprite(reticle_four_files_ts, 0+15, 16+15, 32+15, 48+15);  // Bottom right tile in each image in the stack
+            TileSprite ani = new TileSprite(ts, 224, 225, 226, 227);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;
             int x2 = 10 + 32 + 10;                 // to the right of the first tile
@@ -416,7 +431,7 @@ namespace OpenGLForm {
             // gets choppy when updated at much faster than 'frame' speed)
             ani.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate an animated tile via GDI+
             spr.GDI_Draw_Tile(gg, x1, y1, null, tvpc.frame);  // Demonstrate transparency via GDI+
-            sta.GDI_Draw_Tile(gg, x2, y1, null);  // Hmmm...wrong-facing horse, is the index off for GDI_Draw_Tile() vs blit_square_tile() ???
+            sta.GDI_Draw_Tile(gg, x2, y1, null, tvpc.frame);  // Hmmm...wrong-facing horse, is the index off for GDI_Draw_Tile() vs blit_square_tile() ???
 
         } // Form1.OnPaint()
 
