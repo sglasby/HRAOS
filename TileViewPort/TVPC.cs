@@ -258,6 +258,21 @@ public class TVPC : OpenTK.GLControl {
         // ( view_xx,  view_yy) are viewport tile coordinates of the tile to render
         // (  map_xx,   map_xx) are      map tile coordinates of a map tile to render (or else, off-map)
         // (pixel_xx, pixel_yy) are         pixel coordinates on screen for the (top left) origin of the tile to render
+
+        // Note:
+        // If any layer has over-sized tile contents 
+        // (cursor surrounding the selected tile, larger 1x1 tile which spills over a bit into other tiles)
+        // then the rendering loop needs to be: 
+        //     foreach(layer), for(y), for(x)
+        // rather than: 
+        //     for(y), for(x), foreach(layer)
+        // Otherwise, tiles rightwards/below the over-sized tile will overlap it, 
+        // preventing any pixels rightwards/below the tile bounds from being seen.
+        // 
+        // For the moment, only "cursors" in the ViewPortLayers.UI_Elements layer 
+        // are over-sized, so I am cheating a bit.
+
+        // First, render tiles on MAP layers:
         for (int view_yy = 0; view_yy < this.height_in_tiles; view_yy++) {
             for (int view_xx = 0; view_xx < this.width_in_tiles; view_xx++) {
                 int map_xx = this.x_origin + view_xx;
@@ -270,62 +285,38 @@ public class TVPC : OpenTK.GLControl {
                                (map_xx < this.map.width) &&
                                (map_yy >= 0) &&
                                (map_yy < this.map.height));
-                if (!on_map) { goto RENDER_VIEWPORT_TILES; }
+                if (!on_map) { continue; }
 
-                //RENDER_MAP_TILES:  // Commented this out to shut up a compiler warning about an unused label
                 // First, render sprites from MAP layers:
                 foreach (int LL in MapLayers.MapRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.map.contents_at_LXY(LL, map_xx, map_yy);
                     if (sp != null) {
                         sp.blit_square_tile(pixel_xx, pixel_yy, this.frame);
-                        // this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.frame) );  // OLD
                     }
                 } // foreach(LL)
+            } // for(view_xx)
+        } // for(view_yy)
 
-                RENDER_VIEWPORT_TILES:
-                // Second, render sprites on VIEWPORT layers:
+        // Then, render sprites on VIEWPORT layers:
+        for (int view_yy = 0; view_yy < this.height_in_tiles; view_yy++) {
+            for (int view_xx = 0; view_xx < this.width_in_tiles; view_xx++) {
+                int pixel_xx = (view_xx * (this.tile_width_px + this.padding_px)) + this.tile_grid_offset_x_px;
+                int pixel_yy = (view_yy * (this.tile_height_px + this.padding_px)) + this.tile_grid_offset_y_px;
+
                 foreach (int LL in ViewPortLayers.ViewPortRenderingOrder) {
                     ITileSprite sp = (ITileSprite) this.contents_at_LXY(LL, view_xx, view_yy);
                     if (sp != null) {
-                        sp.blit_square_tile(pixel_xx, pixel_yy, this.quanta);  // Note: Thus _all_ tiles in ViewPortLayers are rendered at the faster 'quanta' rate...
-                        //this.blit_square_tile(pixel_xx, pixel_yy, sp.texture(this.quanta) );  // OLD
+                        // Hack: Center cursor tile larger than 32x32.  Need a more proper way of handling this...
+                        int ff = frame % sp.num_frames;
+                        int offset_x = (this.tile_width_px  - sp.rect[ff].Width)  / 2;
+                        int offset_y = (this.tile_height_px - sp.rect[ff].Height) / 2;
+                        sp.blit_square_tile(pixel_xx + offset_x, pixel_yy + offset_y, this.frame /*this.quanta*/ );
                     }
                 } // foreach(LL)
 
             } // for(view_xx)
         } //  for(view_yy)
     } // Render()
-
-    //public void blit_square_tile(int pixel_xx, int pixel_yy, int texture_id) {
-    //    // Define OpenGL vertex coordinates for a square centered on the origin (0.0, 0.0)
-    //    double LL = -(this.tile_width_px  / 2);
-    //    double RR = +(this.tile_width_px  / 2);
-    //    double TT = -(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
-    //    double BB = +(this.tile_height_px / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
-
-    //    double HALF_TILE_WW = this.tile_width_px  / 2;
-    //    double HALF_TILE_HH = this.tile_height_px / 2;
-    //    const double angle = 0.0;
-
-    //    GL.PushMatrix();
-    //    GL.Translate((pixel_xx + HALF_TILE_WW), (pixel_yy + HALF_TILE_HH), 0);
-    //    GL.Rotate(angle, 0.0, 0.0, -1.0);
-
-    //    GL.BindTexture(TextureTarget.Texture2D, texture_id);
-    //    TileSheet.Check_for_GL_error("In blit_square_tile() after calling GL.BindTexture()");
-
-    //    GL.Begin(BeginMode.Quads);
-    //    {
-    //        GL.TexCoord2(0.0f, 1.0f);  GL.Vertex2(LL, BB);  // Texture, Vertex coordinates for Bottom Left
-    //        GL.TexCoord2(1.0f, 1.0f);  GL.Vertex2(RR, BB);  // Texture, Vertex coordinates for Bottom Right
-    //        GL.TexCoord2(1.0f, 0.0f);  GL.Vertex2(RR, TT);  // Texture, Vertex coordinates for Top Right
-    //        GL.TexCoord2(0.0f, 0.0f);  GL.Vertex2(LL, TT);  // Texture, Vertex coordinates for Top Left
-    //    }
-    //    GL.End();
-
-    //    GL.PopMatrix();
-    //} // blit_square_tile()
-
 
     private void OnLoad(object sender, EventArgs e) {
         SetupViewport();

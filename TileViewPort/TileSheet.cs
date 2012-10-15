@@ -105,10 +105,10 @@ public class TileSheet : ObjectRegistrar.IHaximaSerializeable {
 
     // Constructor methods:
     public TileSheet(int sheet_width_in_tiles, int sheet_height_in_tiles,
-                         int tile_width_px_arg,    int tile_height_px_arg,
-                         int x_offset_arg,         int y_offset_arg,
-                         int x_spacing_arg,        int y_spacing_arg,
-                         params string[] file_names_arg) {
+                     int tile_width_px_arg,    int tile_height_px_arg,
+                     int x_offset_arg,         int y_offset_arg,
+                     int x_spacing_arg,        int y_spacing_arg,
+                     params string[] file_names_arg) {
         // Check the dimensional arguments for the sheet and the tiles:
         if (sheet_width_in_tiles  < 1) { throw new ArgumentException("Invalid sheet width in tiles" ); }
         if (sheet_height_in_tiles < 1) { throw new ArgumentException("Invalid sheet height in tiles"); }

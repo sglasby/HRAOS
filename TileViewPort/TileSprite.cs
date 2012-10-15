@@ -13,6 +13,9 @@ public class TileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite {
     public TileSheet sheet      { get; private set; }
     public int           num_frames { get { return this.frame_indexes.Length; } }
 
+    // TODO: 
+    // Do something useful regarding a range check on these (or index % num_frames)
+    // (May belong in some wrapper method, or the calling classes)
     public int[]       frame_indexes { get; private set; }
     public Bitmap[]    bitmap        { get; private set; }
     public Rectangle[] rect          { get; private set; }
@@ -109,14 +112,20 @@ public class TileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite {
 
     public void blit_square_tile(int pixel_xx, int pixel_yy, int frame) {
         int ff = frame % this.num_frames;
-        // Define OpenGL vertex coordinates for a square centered on the origin (0.0, 0.0)
-        double LL = -(this.rect[ff].Width  / 2);
-        double RR = +(this.rect[ff].Width  / 2);
-        double TT = -(this.rect[ff].Height / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
-        double BB = +(this.rect[ff].Height / 2);  // OpenGL origin coordinate (0,0) at bottom left, we want top left
-
         double HALF_TILE_WW = this.rect[ff].Width  / 2;
         double HALF_TILE_HH = this.rect[ff].Height / 2;
+
+        // Define OpenGL vertex coordinates for a square centered on the origin (0.0, 0.0)
+        double LL = -HALF_TILE_WW;
+        double RR = +HALF_TILE_WW;
+        double TT = -HALF_TILE_HH;  // OpenGL origin coordinate (0,0) at bottom left, we want top left
+        double BB = +HALF_TILE_HH;  // OpenGL origin coordinate (0,0) at bottom left, we want top left
+
+        //double LL = -16;
+        //double RR = +16;
+        //double TT = -16;
+        //double BB = +16;
+
         const double angle = 0.0;
 
         GL.PushMatrix();

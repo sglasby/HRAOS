@@ -221,20 +221,33 @@ namespace OpenGLForm {
             TileSprite anim_reticle = new TileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
             int reticle = anim_reticle.ID;
 
-            // // An attempt to put up a better cursor...
-            //ts_cursor_blink_40x40 = new TileSheet(1, 1, 
-            //    @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_1.png",
-            //    @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_2.png");
-            //TileSprite large_cursor = new TileSprite(ts_cursor_blink_40x40, 0, 1);
-            //int LC = large_cursor.ID;  // does not render quite right yet: (no offset, seems cut off at 32x32 boundary)
+            // Over-sized cursor, drawback: outside of tile bounds 
+            // is off-viewport for edge-of-viewport sides of cursor on edge-of-viewport tiles.
+            // Also, the "quanta" animation rate for the cursor blinking is too fast, as in "pokemon epilepsy warning" too-fast.
+            // (Blinking at "frame" rate seems OK...may want a modestly faster rate.)
             // 
-            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, LC);  // Center
+            // This cursor _does_ look a lot better, other than for edge-of-viewport tiles.
+            // One possible solution to that issue would be for the "rest" state of the viewport
+            // to have an n-pixel border along all edges, showing partial tiles.
+            // Will need to coordinate all this with smooth-scrolling, too...
+            ts_cursor_blink_40x40 = new TileSheet(1, 1, 40, 40, 0, 0, 0, 0,
+                @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_1.png",
+                @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_2.png");
+            TileSprite large_cursor = new TileSprite(ts_cursor_blink_40x40, 0, 1);
+            int LC = large_cursor.ID;
+            
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, LC);  // Center
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             LC);  // NW
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             LC);  // NE
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             tvpc.max_y,    LC);  // SW
+            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    tvpc.max_y,    LC);  // SE
 
-            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
-            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
-            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             reticle);  // NE
-            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             tvpc.max_y,    reticle);  // SW
-            tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    tvpc.max_y,    reticle);  // SE
+            // // "Marquee" cursor, drawback: within tile bounds clips edge pixels of under-cursor tile...
+            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
+            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
+            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             reticle);  // NE
+            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             tvpc.max_y,    reticle);  // SW
+            //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    tvpc.max_y,    reticle);  // SE
 
         } // OnShown()
 
