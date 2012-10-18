@@ -12,9 +12,10 @@ using OpenTK.Graphics.OpenGL;
 // It does NOT store any information about individual rectangle regions,
 // as that job is handled by other classes, which implement ITileSprite.
 // 
-public class TileSheet : ObjectRegistrar.IHaximaSerializeable {
-    public int    ID  { get; private set; }
-    public string tag { get { return String.Format("{0}-{1}", ObjectRegistrar.Sprites.tag_prefix, ID); } }
+public class TileSheet : IHaximaSerializeable {
+    public int    ID      { get; set; }
+    public string autotag { get; set; }
+    public string tag     { get; set; }
 
     public  string[] file_names { get; private set; }
     public  Bitmap[] bitmaps    { get; private set; }
@@ -108,6 +109,7 @@ public class TileSheet : ObjectRegistrar.IHaximaSerializeable {
                      int tile_width_px_arg,    int tile_height_px_arg,
                      int x_offset_arg,         int y_offset_arg,
                      int x_spacing_arg,        int y_spacing_arg,
+                     int obj_ID,
                      params string[] file_names_arg) {
         // Check the dimensional arguments for the sheet and the tiles:
         if (sheet_width_in_tiles  < 1) { throw new ArgumentException("Invalid sheet width in tiles" ); }
@@ -171,17 +173,16 @@ public class TileSheet : ObjectRegistrar.IHaximaSerializeable {
             }
         } // for(ii)
 
-        this.ID = 123456;  // TODO: change this later
-        // this.ID = ObjectRegistrar.Sprites.register_obj_as(this, typeof(NEW_TileSheet));
+        this.ID = ObjectRegistrar.TileSheets.register_object_as(this, typeof(TileSheet), obj_ID);
         return;
     } // NEW_TileSheet(many_args)
 
-    public TileSheet(int tiles_across, int tiles_high, params string[] file_names_arg) :
+    public TileSheet(int tiles_across, int tiles_high, int obj_ID, params string[] file_names_arg) :
         this(tiles_across, tiles_high,
              32, 32,  // (32 x 32 pixels) is the most common tile size
              0,  0,   // zero X and Y offset  (no blank space on left/top of sheet)
              0,  0,   // zero X and Y spacing (no blank space between columns/rows)
-             file_names_arg) {
+             obj_ID, file_names_arg) {
         // This overload has an empty method body
     } // NEW_TileSheet()
 

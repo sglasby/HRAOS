@@ -12,6 +12,8 @@ namespace OpenGLForm {
     public partial class Form1 : Form {
         Stopwatch   sw = new Stopwatch(); // available to all event handlers
 
+        const int NEW_OBJID = 0;
+
         TileSheet   ts;
         //TileSheet reticle_single_file_ts;
         TileSheet   reticle_four_files_ts;
@@ -85,64 +87,57 @@ namespace OpenGLForm {
             // code has been moved here, in a method we set up to be called upon the 'Shown' event
             // (which is fired upon the first display of this Form).
 
-            ts = new TileSheet(16, 16, @"Main/U4.B_enhanced-32x32.png");
+            ts = new TileSheet(16, 16, NEW_OBJID, @"Main/U4.B_enhanced-32x32.png");
 
-            f1234       = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, @"Main/example_all_facings.4_frames.intra_1.png");
-            f1234_stack = new TileSheet(1, 9, 32, 32, 1, 1, 1, 1,
+            f1234       = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, NEW_OBJID, @"Main/example_all_facings.4_frames.intra_1.png");
+            f1234_stack = new TileSheet(1, 9, 32, 32, 1, 1, 1, 1, NEW_OBJID,
                 @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_1.png",
                 @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_2.png",
                 @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_3.png",
                 @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_4.png");
 
-            //reticle_single_file_ts = new TileSheet(4, 1, @"Main/bright_marquee.frame_1234.png");
-            reticle_four_files_ts  = new TileSheet(4, 4,
-                            @"Main/bright_marquee.frame_1.png",
-                            @"Main/bright_marquee.frame_2.png",
-                            @"Main/bright_marquee.frame_3.png",
-                            @"Main/bright_marquee.frame_4.png");  // Test the params filenames[] invocation of the constructor...
+            wp_ts = new TileSheet(4, 1, NEW_OBJID, @"Main/whirlpool_bright.png");
 
-            wp_ts = new TileSheet(4, 1, @"Main/whirlpool_bright.png");
-
-            wp_stack_ts = new TileSheet(1, 1,
+            wp_stack_ts = new TileSheet(1, 1, NEW_OBJID,
                 @"Main/tiles/whirlpool.stacked/whirlpool_1.png",
                 @"Main/tiles/whirlpool.stacked/whirlpool_2.png",
                 @"Main/tiles/whirlpool.stacked/whirlpool_3.png",
                 @"Main/tiles/whirlpool.stacked/whirlpool_4.png");
 
-            creatures_stack = new TileSheet(4, 7,
+            creatures_stack = new TileSheet(4, 7, NEW_OBJID,
                 @"Main/tiles/creatures.stacked/creatures.frame_1.png",
                 @"Main/tiles/creatures.stacked/creatures.frame_2.png",
                 @"Main/tiles/creatures.stacked/creatures.frame_3.png",
                 @"Main/tiles/creatures.stacked/creatures.frame_4.png");
 
             //string[] empty_file_names_list = { };
-            //TileSheet null_filenames_ts       = new TileSheet(4, 4, null                 );  // Will throw an exception
-            //TileSheet empty_filenames_list_ts = new TileSheet(4, 4, empty_file_names_list);  // Will throw an exception
+            //TileSheet null_filenames_ts       = new TileSheet(4, 4, NEW_OBJID, null                 );  // Will throw an exception
+            //TileSheet empty_filenames_list_ts = new TileSheet(4, 4, NEW_OBJID, empty_file_names_list);  // Will throw an exception
 
-            TileSprite anim_blue_wiz = new TileSprite(ts, 32, 33);
-            TileSprite anim_red_wiz  = new TileSprite(ts, 224, 225, 226, 227 );
+            TileSprite anim_blue_wiz = new TileSprite(ts, NEW_OBJID, 32, 33);
+            TileSprite anim_red_wiz  = new TileSprite(ts, NEW_OBJID, 224, 225, 226, 227 );
 
             // Counters for 3 frames (A,B,C) and for 4 frames (1,2,3,4)
             // This illustrates why the master frame cycle need be the Least Common Multiple of (3,4) 
             // (or whatever other set of ITileSprite.num_frames values).
-            TileSprite count_ABC     = new TileSprite(ts, 96, 97, 98);  //ts[0, 6], ts[1, 6], ts[2, 6]);
-            TileSprite count_1234    = new TileSprite(f1234_stack, 0, 9+0, 18+0, 27+0);  // Same as count_1234, but frames from 4 files
+            TileSprite count_ABC     = new TileSprite(ts,          NEW_OBJID, 96, 97, 98);  //ts[0, 6], ts[1, 6], ts[2, 6]);
+            TileSprite count_1234    = new TileSprite(f1234_stack, NEW_OBJID, 0, 9+0, 18+0, 27+0);  // Same as count_1234, but frames from 4 files
 
-            // TileSprite whirlpool = new TileSprite(wp_ts, 0, 1, 2, 3);
-            TileSprite whirlpool = new TileSprite(wp_stack_ts, 0, 1, 2, 3);  // Save as from wp_ts, but using 4 image files in a stack
+            // TileSprite whirlpool = new TileSprite(wp_ts, NEW_OBJID, 0, 1, 2, 3);
+            TileSprite whirlpool = new TileSprite(wp_stack_ts, NEW_OBJID, 0, 1, 2, 3);  // Save as from wp_ts, but using 4 image files in a stack
 
-            TileSprite bat       = new TileSprite(creatures_stack, (0*28) +1, (1*28) +1, (2*28) +1, (3*28) +1);
-            TileSprite skel_mage = new TileSprite(creatures_stack, (0*28)+21, (1*28)+21, (2*28)+21, (3*28)+21);
+            TileSprite bat       = new TileSprite(creatures_stack, NEW_OBJID, (0*28) +1, (1*28) +1, (2*28) +1, (3*28) +1);
+            TileSprite skel_mage = new TileSprite(creatures_stack, NEW_OBJID, (0*28)+21, (1*28)+21, (2*28)+21, (3*28)+21);
 
-            LF = new TileSheet(8, 1, @"Main/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
-            TileSprite lava_flow = new TileSprite(LF, 0, 1, 2, 3, 4, 5, 6, 7);
+            LF = new TileSheet(8, 1, NEW_OBJID, @"Main/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
+            TileSprite lava_flow = new TileSprite(LF, NEW_OBJID, 0, 1, 2, 3, 4, 5, 6, 7);
 
             // TODO: Support some manner of ITileSprite for "wave" sprites
-            // TileSheet TW = new TileSheet(1, 9, @"Main/example_wave_test.intra_1.png");  // Will need WaveTileSprite to support this...
+            // TileSheet TW = new TileSheet(1, 9, NEW_OBJID, @"Main/example_wave_test.intra_1.png");  // Will need WaveTileSprite to support this...
 
-            TileSprite grass   = new TileSprite(ts, 4);
-            TileSprite trees   = new TileSprite(ts, 6);
-            TileSprite boulder = new TileSprite(ts, 57);
+            TileSprite grass   = new TileSprite(ts, NEW_OBJID,  4);
+            TileSprite trees   = new TileSprite(ts, NEW_OBJID,  6);
+            TileSprite boulder = new TileSprite(ts, NEW_OBJID, 57);
             int[] path_rect_5x4 = new int[]
             { // 5 = grass, 7 = trees, 58 = boulder
                boulder.ID, grass.ID, grass.ID, trees.ID, grass.ID,
@@ -217,11 +212,9 @@ namespace OpenGLForm {
 
             // Add some elements to the UI_elements layer of the TileViewPort:
 
-            //TileSprite anim_reticle = new TileSprite(reticle_single_file_ts, 0, 1, 2, 3);
-            TileSprite anim_reticle = new TileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
-            int reticle = anim_reticle.ID;
 
-            // Over-sized cursor, drawback: outside of tile bounds 
+            // Over-sized cursor
+            // Drawback: outside of tile bounds 
             // is off-viewport for edge-of-viewport sides of cursor on edge-of-viewport tiles.
             // Also, the "quanta" animation rate for the cursor blinking is too fast, as in "pokemon epilepsy warning" too-fast.
             // (Blinking at "frame" rate seems OK...may want a modestly faster rate.)
@@ -230,10 +223,10 @@ namespace OpenGLForm {
             // One possible solution to that issue would be for the "rest" state of the viewport
             // to have an n-pixel border along all edges, showing partial tiles.
             // Will need to coordinate all this with smooth-scrolling, too...
-            ts_cursor_blink_40x40 = new TileSheet(1, 1, 40, 40, 0, 0, 0, 0,
+            ts_cursor_blink_40x40 = new TileSheet(1, 1, 40, 40, 0, 0, 0, 0, NEW_OBJID,
                 @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_1.png",
                 @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_2.png");
-            TileSprite large_cursor = new TileSprite(ts_cursor_blink_40x40, 0, 1);
+            TileSprite large_cursor = new TileSprite(ts_cursor_blink_40x40, NEW_OBJID, 0, 1);
             int LC = large_cursor.ID;
             
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, LC);  // Center
@@ -242,7 +235,17 @@ namespace OpenGLForm {
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             tvpc.max_y,    LC);  // SW
             tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    tvpc.max_y,    LC);  // SE
 
-            // // "Marquee" cursor, drawback: within tile bounds clips edge pixels of under-cursor tile...
+            // // "Marquee" cursor
+            // // Drawback: cursor itself is entirely within tile bounds, thus clips edge pixels of the under-cursor tile...
+            // // 
+            //reticle_single_file_ts = new TileSheet(4, 1, NEW_OBJID, @"Main/bright_marquee.frame_1234.png");
+            reticle_four_files_ts  = new TileSheet(4, 4, NEW_OBJID,
+                            @"Main/bright_marquee.frame_1.png",
+                            @"Main/bright_marquee.frame_2.png",
+                            @"Main/bright_marquee.frame_3.png",
+                            @"Main/bright_marquee.frame_4.png");  // Also used in Form1.OnPaint()
+            //TileSprite anim_reticle = new TileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
+            //int reticle = anim_reticle.ID;
             //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center
             //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(0,             0,             reticle);  // NW
             //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.max_x,    0,             reticle);  // NE
@@ -432,9 +435,9 @@ namespace OpenGLForm {
             // but it is nice to have the capability.
 
             Graphics   gg  = this.CreateGraphics();
-            TileSprite sta =  new TileSprite(ts, 21);
-            TileSprite spr = new TileSprite(reticle_four_files_ts, 0+15, 16+15, 32+15, 48+15);  // Bottom right tile in each image in the stack
-            TileSprite ani = new TileSprite(ts, 224, 225, 226, 227);
+            TileSprite sta = new TileSprite(ts,                    NEW_OBJID, 21);
+            TileSprite spr = new TileSprite(reticle_four_files_ts, NEW_OBJID, 0+15, 16+15, 32+15, 48+15);  // Bottom right tile in each image in the stack
+            TileSprite ani = new TileSprite(ts,                    NEW_OBJID, 224, 225, 226, 227);
             // Might also get an Image Attributes value, rather than passing null for the last argument...
             int x1 = 10;
             int x2 = 10 + 32 + 10;                 // to the right of the first tile

@@ -63,11 +63,11 @@ public interface IGridIterable
 
 
 
-public class SimpleMapV1
-{
+// TODO: SimpleMapV1 and various of the entities it contains (IGridIterable type?) should be IHaximaSerializeable ...
+public class SimpleMapV1 {
     public int width       { get; set; }
     public int height      { get; set; }
-    public TileSheet sheet { get; private set; } // This belongs elsewhere, after implementation bootstrapping...
+    public TileSheet sheet { get; private set; } // This belongs elsewhere, after implementation bootstrapping...Hmmm, may not even be needed now
     public IGridIterable[] layers;
     // TODO: Add support for "default object/terrain", likely on a per-layer basis...
 
@@ -113,9 +113,9 @@ public class SimpleMapV1
         }
         // More refactoring coming up, once the map data is object_IDs rather than sprite_IDs...
         // For that matter, does one generally want (the obj reference, or the obj ID) to be returned from such a method?
-        // Possibly we want an overload to get either?  Study how it is used in practice, refactor to match most convenient mode of use...
+        // Possibly we want an overload to get either?  Study how it is used in practice, refactor to match the most convenient mode of use...
         int sprite_ID = layers[layer].contents_at_XY(xx, yy);
-        return ObjectRegistrar.Sprites.obj_for_ID(sprite_ID);
+        return ObjectRegistrar.Sprites.object_for_ID(sprite_ID);
     } // contents_at_LXY()
 
 

@@ -120,9 +120,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Main\Error.cs" />
     <Compile Include="Main\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Main\IHaximaSerializeable.cs" />
     <Compile Include="Main\Program.cs" />
     <Compile Include="TileViewPort\GridUtility.cs" />
     <Compile Include="TileViewPort\HaxObj.cs" />
@@ -133,7 +135,7 @@
     <Compile Include="TileViewPort\MapSparseGridLayer.cs" />
     <Compile Include="TileViewPort\TileSheet.cs" />
     <Compile Include="TileViewPort\TileSprite.cs" />
-    <Compile Include="TileViewPort\ObjectRegistrar.cs" />
+    <Compile Include="Main\ObjectRegistrar.cs" />
     <Compile Include="TileViewPort\Rect.cs" />
     <Compile Include="TileViewPort\SimpleMapV1.cs" />
     <Compile Include="TileViewPort\TilingModes.cs" />

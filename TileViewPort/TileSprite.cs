@@ -5,10 +5,13 @@ using System.IO;
 
 using OpenTK.Graphics.OpenGL;
 
-public class TileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite {
+public class TileSprite : IHaximaSerializeable, ITileSprite {
 
-    public int    ID  { get; private set; }
-    public string tag { get { return String.Format("{0}-{1}", ObjectRegistrar.Sprites.tag_prefix, ID); } }
+    public int    ID      { get; set; }
+    public string autotag { get; set; }
+    public string tag     { get; set; }
+
+    //public string tag { get { return String.Format("{0}-{1}", ObjectRegistrar.Sprites.tag_prefix, ID); } }
 
     public TileSheet sheet      { get; private set; }
     public int           num_frames { get { return this.frame_indexes.Length; } }
@@ -26,7 +29,7 @@ public class TileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite {
     //////////////////////////////////////////////////////////////////////
 
     // Constructor methods:
-    public TileSprite(TileSheet tile_sheet, params int[] frame_index_args) {
+    public TileSprite(TileSheet tile_sheet, int obj_ID, params int[] frame_index_args) {
         // This form of the constructor is more convenient to call when 
         // the frames are specified via a single index.
         // When specified by [x,y] within the TileSheet, the other form is needful.
@@ -54,8 +57,9 @@ public class TileSprite : ObjectRegistrar.IHaximaSerializeable, ITileSprite {
             this.rect[ii]          = this.sheet.rect_for_tile(index_on_sheet);
             this.texture[ii]       = Load_OpenGL_texture_for_tile(this.bitmap[ii], this.rect[ii]);
         }
-        this.ID = ObjectRegistrar.Sprites.register_obj_as(this, typeof(ITileSprite) );
-    } // NEW_TileSprite(sh,frame_indexes)
+
+        this.ID = ObjectRegistrar.Sprites.register_object_as(this, typeof(ITileSprite), obj_ID);
+    } // NEW_TileSprite(sh,objID,frame_indexes)
 
 
     private int Load_OpenGL_texture_for_tile(Bitmap bitmap, Rectangle tile_rect) {

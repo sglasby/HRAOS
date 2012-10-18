@@ -74,8 +74,8 @@ public class DenseGrid : IGridIterable {
     } // fill()
 
     public static DenseGrid BlitFromAOntoB(DenseGrid from_A, int from_x, int from_y,
-                                           DenseGrid to_B, int to_x, int to_y,
-                                           int blit_width, int blit_height) {
+                                           DenseGrid to_B,   int to_x,   int to_y,
+                                           int blit_width,   int blit_height) {
         // Blit from A onto B, with as many method arguments as possible.
         if (from_A == null)
             return null;

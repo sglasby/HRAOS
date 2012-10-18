@@ -181,7 +181,7 @@ public class TVPC : OpenTK.GLControl {
             throw new ArgumentException("Accessed a layer which is null");
         }
         int sprite_ID = this.layers[layer].contents_at_XY(xx, yy);
-        return ObjectRegistrar.Sprites.obj_for_ID(sprite_ID);
+        return ObjectRegistrar.Sprites.object_for_ID(sprite_ID);
     } // contents_at_LXY()
 
     public int ID_at_LXY(int layer, int xx, int yy) {
