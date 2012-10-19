@@ -120,6 +120,26 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Archetype.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\IArchetypeField.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\IObjField.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Obj.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldDecimal.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldID.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldInt.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldListDecimal.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldListID.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldListInt.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldListString.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldString.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldTempNull.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\ObjFieldTypes\FieldTypes.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Script_Lexer.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Script_Parser.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Script_Parser_ARCHETYPE.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Script_Parser_OBJ.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\Script_Parser_Terminals.cs" />
+    <Compile Include="HaximaRunTimeAttributeObjectSystem\STDOUT.cs" />
     <Compile Include="Main\Error.cs" />
     <Compile Include="Main\Form1.cs">
       <SubType>Form</SubType>

@@ -6,6 +6,8 @@ using System.Text;
 public class ObjectRegistrar {
     // The global registrars:
     public  static ObjectRegistrar All;
+    public  static ObjectRegistrar Archetypes;
+    public  static ObjectRegistrar Objs;
     public  static ObjectRegistrar Sprites;
     public  static ObjectRegistrar TileSheets;
     // ...more such would be added, per each type we want to handily retrieve a list of instances of...
@@ -35,6 +37,8 @@ public class ObjectRegistrar {
         // Static class constructor:
         highest_ID = 0;
         All        = new ObjectRegistrar(typeof(object),      "ALL");  // No need for prefix on this one
+        Archetypes = new ObjectRegistrar(typeof(Archetype),   "Archetype");
+        Objs       = new ObjectRegistrar(typeof(Obj),         "Obj");
         TileSheets = new ObjectRegistrar(typeof(TileSheet),   "TileSheet");
         Sprites    = new ObjectRegistrar(typeof(ITileSprite), "Sprite");
         // ...more such would be added, per each type we want to handily retrieve a list of instances of...
@@ -71,7 +75,7 @@ public class ObjectRegistrar {
         return ID;
     } // ID_for_obj()
 
-    public object object_for_ID(int ID) {
+    public IHaximaSerializeable object_for_ID(int ID) {
         IHaximaSerializeable obj = null;
         if (ID == 0) { return obj; }  // The special ID 0 never refers to a valid object of any kind
         bool found = objs_by_ID.TryGetValue(ID, out obj);
@@ -101,12 +105,12 @@ public class ObjectRegistrar {
         // into 'All' and into the class-specific registrar.
         // 
         // This scheme may be extended at some point to allow adding 
-        // more ObjRegistrar instances at runtime (when some script syntax specifies thus),
+        // more ObjectRegistrar instances at runtime (when some script syntax specifies thus),
         // indicating that all Obj of some Archetype should be 
-        // indexed in such an ObjRegistrar.
+        // indexed in such an ObjectRegistrar.
         // 
         // To do so would probably require re-arranging the current 
-        // named static ObjRegistrar instances into a Dictionary<string, ObjRegistrar>
+        // named static ObjectRegistrar instances into a Dictionary<string, ObjectRegistrar>
         // so that all such could be accessed in the same way.
         if (obj == null ||
             tt != registered_type) {
@@ -194,7 +198,7 @@ public class ObjectRegistrar {
     /*****************************************/
 
     // TODO:
-    // There remains a block of methods in HRAOS_Parser ObjRegistrar.cs 
+    // There remains a block of methods in HRAOS_Parser ObjectRegistrar.cs 
     // which will need to be brought over when the parser is merged.
     // 
     // Those methods pertain to the Archetype class,
@@ -206,5 +210,15 @@ public class ObjectRegistrar {
     // public Archetype Archetype_for_tag(string tag)                // Commented out, under review as to whether it should exist
     // public void register_Archetype(Archetype arch, int new_ID) {  // This has no callers ATM
     // public void unregister_Archetype(Archetype arch) {            // This has no callers ATM
+
+    public Archetype Archetype_for_ID(int ID) {  // One caller: in Script_Parser_OBJ.cs, parse_OBJ_parent_archetype_field()
+        // The main benefit of this method, is to avoid a typecast on the part of the caller.
+        object obj = object_for_ID(ID);
+        if (obj.GetType() != typeof(Archetype)) { Error.BadArg("Called for non-Archetype"); }
+        return (Archetype) obj;
+    } // Archetype_for_ID()
+
+
+
 
 } // class ObjectRegistrar
