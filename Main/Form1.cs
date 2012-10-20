@@ -296,7 +296,7 @@ public partial class Form1 : Form {
     } // OnShown()
 
 
-    int x_pixel_shift;
+    //int x_pixel_shift;  // First attempts at a smooth-scroll mode:
     public void OnKeyDown(object sender, KeyEventArgs ee) {
         // By default, certain key events are pre-processed by the Form,
         // before any contained Control gets that key event.
@@ -331,19 +331,19 @@ public partial class Form1 : Form {
         // 
         // On the other hand, key repeat works now, and the scrolling speed is excellent!
 
-        // First attempts at a smooth-scroll mode:
-        x_pixel_shift = 0;
-        if ((ee.Modifiers & Keys.Shift) != 0) {
-            if (ee.KeyCode == Keys.Left ||
-                ee.KeyCode == Keys.NumPad4) { // West
-                x_pixel_shift = +32;
-            }
-            if (ee.KeyCode == Keys.Right ||
-                ee.KeyCode == Keys.NumPad6) { // East
-                x_pixel_shift = -32;
-            }
-            return;
-        } // Handling SHIFT for smooth-scroll left/right
+        // // First attempts at a smooth-scroll mode:
+        //x_pixel_shift = 0;
+        //if ((ee.Modifiers & Keys.Shift) != 0) {
+        //    if (ee.KeyCode == Keys.Left ||
+        //        ee.KeyCode == Keys.NumPad4) { // West
+        //        x_pixel_shift = +32;
+        //    }
+        //    if (ee.KeyCode == Keys.Right ||
+        //        ee.KeyCode == Keys.NumPad6) { // East
+        //        x_pixel_shift = -32;
+        //    }
+        //    return;
+        //} // Handling SHIFT for smooth-scroll left/right
 
 
         // Arrow keys and Number pad (with and without NumLock) are set to scroll the viewport 1 tile:

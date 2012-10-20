@@ -238,13 +238,13 @@ public partial class Script_Parser {
     }
 
     void print_debug_for_add_list_field(string field_name, FieldType type, List<int> list_int, List<string> list_string, List<decimal> list_decimal) {
-        return;  // Comment out to re-enable debug output.  Goes well with the debug output in parse_OBJ_decl()
+        //Form1.stdout.print("    OBJ add_field(name={0}, type={1},[", field_name, type.ToString());
+        //if (list_int     != null) { foreach (int     ii in list_int)     { Form1.stdout.print("{0}, ",   ii); } }
+        //if (list_string  != null) { foreach (string  ss in list_string)  { Form1.stdout.print("'{0}', ", ss); } }
+        //if (list_decimal != null) { foreach (decimal dd in list_decimal) { Form1.stdout.print("{0}M, ",  dd); } }
+        //Form1.stdout.print("]\n");
 
-        Form1.stdout.print("    OBJ add_field(name={0}, type={1},[", field_name, type.ToString());
-        if (list_int != null) { foreach (int     ii in list_int) { Form1.stdout.print("{0}, ", ii); } }
-        if (list_string != null) { foreach (string  ss in list_string) { Form1.stdout.print("'{0}', ", ss); } }
-        if (list_decimal != null) { foreach (decimal dd in list_decimal) { Form1.stdout.print("{0}M, ", dd); } }
-        Form1.stdout.print("]\n");
+        return;  // Uncomment the block above to re-enable debug output.  Goes well with the debug output in parse_OBJ_decl()
     }
 
 
