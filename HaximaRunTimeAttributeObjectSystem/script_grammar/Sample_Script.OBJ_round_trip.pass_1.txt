@@ -1,0 +1,58 @@
+--- Serializing parsed ARCHETYPEs: ---
+
+ARCHETYPE first_test_archetype, ID=1 {
+  int_field          => INT         , 42
+  string_field       => STRING      , 'abc'
+  decimal_field      => DECIMAL     , 123.456M
+  ID_field           => ID          , 0
+  list_int_field     => LIST_INT    , [1, 2, 3]
+  list_string_field  => LIST_STRING , ['abc', 'def', 'hij']
+  list_decimal_field => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+  list_ID_field      => LIST_ID     , [first_test_archetype, 0, 0]
+}
+
+
+--- Serializing parsed OBJs: ---
+
+OBJ (TAG => first_test_obj, ID => 2, ARCHETYPE => first_test_archetype) {
+  int_field          => 21
+  string_field       => 'UVWxyz'
+  decimal_field      => 999.001M
+  ID_field           => first_test_archetype
+  list_int_field     => [24, 48, 96, 192]
+  list_string_field  => ['abcd', 'defg', 'hijk', 'lmno']
+  list_decimal_field => [111.111M, 222.222M, 333.333M, 444.444M]
+  list_ID_field      => [first_test_archetype, 0, first_test_archetype, 0]
+  int_field_NIA      => 99
+  string_field_NIA   => 'yee-ha!'
+  decimal_field_NIA  => 11.22M
+  ID_field_NIA       => first_test_obj
+  int_list_NIA       => [11, 22]
+  string_list_NIA    => ['AA', 'BB']
+  decimal_list_NIA   => [11.22M, 22.33M]
+  ID_list_NIA        => [first_test_obj, first_test_archetype, 0, first_test_obj, first_test_archetype, 0]
+}
+
+OBJ (ID => 3, ARCHETYPE => first_test_archetype) {
+}
+
+OBJ (ID => 4, ARCHETYPE => first_test_archetype) {
+  int_field          => 43
+  string_field       => 'ABC-DEF'
+  decimal_field      => 456.123M
+  ID_field           => OBJ-3
+  list_int_field     => [1, 2]
+  list_string_field  => ['aa', 'bb']
+  list_decimal_field => [1.1M, 2.2M]
+  list_ID_field      => [first_test_archetype, first_test_archetype]
+  int_field_NIA      => 1
+  string_field_NIA   => 'foo bar'
+  decimal_field_NIA  => 101.101M
+  int_list_NIA       => [11, 22]
+  string_list_NIA    => ['cc', 'dd']
+  decimal_list_NIA   => [33.33M, 44.44M]
+}
+
+OBJ (TAG => the_OBJ_of_errors, ID => 5, ARCHETYPE => first_test_archetype) {
+}
+

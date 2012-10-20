@@ -1,0 +1,10 @@
+ARCHETYPE contains_invalid_fields {
+    I1  => INT, 123
+    I1  => INT, 456  // Duplicate fieldname
+    x1  => INT, 1
+    x1  => STRING, "abc"  // Duplicate fieldname with conflicting field type
+    xI1 => INT, "abc"     // int field, string contents
+    xI2 => INT, 1.0M      // int field, decimal contents
+    xI3 => INT, bare_word // int field, bareword contents
+    list_int_1 => INT, [ 1, 2, 3    // Missing closing bracket
+}

@@ -100,28 +100,32 @@ public partial class Form1 : Form {
         // code has been moved here, in a method we set up to be called upon the 'Shown' event
         // (which is fired upon the first display of this Form).
 
-        ts = new TileSheet(16, 16, NEW_OBJID, @"Main/U4.B_enhanced-32x32.png");
+        ts = new TileSheet(16, 16, NEW_OBJID, 
+            @"media/tiles/U4.B_enhanced-32x32.png");
 
-        f1234 = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, NEW_OBJID, @"Main/example_all_facings.4_frames.intra_1.png");
+        f1234 = new TileSheet(4, 9, 32, 32, 1, 1, 1, 1, NEW_OBJID, 
+            @"media/tiles/example_all_facings.4_frames.intra_1.png");
+
         f1234_stack = new TileSheet(1, 9, 32, 32, 1, 1, 1, 1, NEW_OBJID,
-            @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_1.png",
-            @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_2.png",
-            @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_3.png",
-            @"Main/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_4.png");
+            @"media/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_1.png",
+            @"media/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_2.png",
+            @"media/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_3.png",
+            @"media/tiles/example_all_facings.stacked/example_all_facings.intra_1.frame_4.png");
 
-        wp_ts = new TileSheet(4, 1, NEW_OBJID, @"Main/whirlpool_bright.png");
+        wp_ts = new TileSheet(4, 1, NEW_OBJID, 
+            @"media/tiles/whirlpool_bright.png");
 
         wp_stack_ts = new TileSheet(1, 1, NEW_OBJID,
-            @"Main/tiles/whirlpool.stacked/whirlpool_1.png",
-            @"Main/tiles/whirlpool.stacked/whirlpool_2.png",
-            @"Main/tiles/whirlpool.stacked/whirlpool_3.png",
-            @"Main/tiles/whirlpool.stacked/whirlpool_4.png");
+            @"media/tiles/whirlpool.stacked/whirlpool_1.png",
+            @"media/tiles/whirlpool.stacked/whirlpool_2.png",
+            @"media/tiles/whirlpool.stacked/whirlpool_3.png",
+            @"media/tiles/whirlpool.stacked/whirlpool_4.png");
 
         creatures_stack = new TileSheet(4, 7, NEW_OBJID,
-            @"Main/tiles/creatures.stacked/creatures.frame_1.png",
-            @"Main/tiles/creatures.stacked/creatures.frame_2.png",
-            @"Main/tiles/creatures.stacked/creatures.frame_3.png",
-            @"Main/tiles/creatures.stacked/creatures.frame_4.png");
+            @"media/tiles/creatures.stacked/creatures.frame_1.png",
+            @"media/tiles/creatures.stacked/creatures.frame_2.png",
+            @"media/tiles/creatures.stacked/creatures.frame_3.png",
+            @"media/tiles/creatures.stacked/creatures.frame_4.png");
 
         //string[] empty_file_names_list = { };
         //TileSheet null_filenames_ts       = new TileSheet(4, 4, NEW_OBJID, null                 );  // Will throw an exception
@@ -142,11 +146,12 @@ public partial class Form1 : Form {
         TileSprite bat       = new TileSprite(creatures_stack, NEW_OBJID, (0 * 28) + 1, (1 * 28) + 1, (2 * 28) + 1, (3 * 28) + 1);
         TileSprite skel_mage = new TileSprite(creatures_stack, NEW_OBJID, (0 * 28) + 21, (1 * 28) + 21, (2 * 28) + 21, (3 * 28) + 21);
 
-        LF = new TileSheet(8, 1, NEW_OBJID, @"Main/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
+        LF = new TileSheet(8, 1, NEW_OBJID, 
+            @"media/tiles/lava.wave_down.speed_4.frames_8.png");  // LF == LavaFlow
         TileSprite lava_flow = new TileSprite(LF, NEW_OBJID, 0, 1, 2, 3, 4, 5, 6, 7);
 
         // TODO: Support some manner of ITileSprite for "wave" sprites
-        // TileSheet TW = new TileSheet(1, 9, NEW_OBJID, @"Main/example_wave_test.intra_1.png");  // Will need WaveTileSprite to support this...
+        // TileSheet TW = new TileSheet(1, 9, NEW_OBJID, @"media/tiles/example_wave_test.intra_1.png");  // Will need WaveTileSprite to support this...
 
         TileSprite grass   = new TileSprite(ts, NEW_OBJID, 4);
         TileSprite trees   = new TileSprite(ts, NEW_OBJID, 6);
@@ -182,7 +187,7 @@ public partial class Form1 : Form {
         DenseGrid.BlitFromAOntoB(flip_ns_rot090, map_16x64, 1, 58);
         DenseGrid.BlitFromAOntoB(flip_wens_rot090, map_16x64, 7, 58);
 
-        map = new SimpleMapV1(16, 64, ts);
+        map = new SimpleMapV1(16, 64);
         map.AddTerrainRegion(map_16x64, 0, 0);
 
         tvpc.scroll_constraint = ScrollConstraint.CenterTile;
@@ -237,8 +242,8 @@ public partial class Form1 : Form {
         // to have an n-pixel border along all edges, showing partial tiles.
         // Will need to coordinate all this with smooth-scrolling, too...
         ts_cursor_blink_40x40 = new TileSheet(1, 1, 40, 40, 0, 0, 0, 0, NEW_OBJID,
-            @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_1.png",
-            @"Main/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_2.png");
+            @"media/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_1.png",
+            @"media/cursors/cursor_40x40_blink.stacked/cursor_40x40.frame_2.png");
         TileSprite large_cursor = new TileSprite(ts_cursor_blink_40x40, NEW_OBJID, 0, 1);
         int LC = large_cursor.ID;
 
@@ -251,12 +256,12 @@ public partial class Form1 : Form {
         // // "Marquee" cursor
         // // Drawback: cursor itself is entirely within tile bounds, thus clips edge pixels of the under-cursor tile...
         // // 
-        //reticle_single_file_ts = new TileSheet(4, 1, NEW_OBJID, @"Main/bright_marquee.frame_1234.png");
+        //reticle_single_file_ts = new TileSheet(4, 1, NEW_OBJID, @"media/tiles/bright_marquee.frame_1234.png");
         reticle_four_files_ts = new TileSheet(4, 4, NEW_OBJID,
-                        @"Main/bright_marquee.frame_1.png",
-                        @"Main/bright_marquee.frame_2.png",
-                        @"Main/bright_marquee.frame_3.png",
-                        @"Main/bright_marquee.frame_4.png");  // Also used in Form1.OnPaint()
+                        @"media/tiles/bright_marquee.frame_1.png",
+                        @"media/tiles/bright_marquee.frame_2.png",
+                        @"media/tiles/bright_marquee.frame_3.png",
+                        @"media/tiles/bright_marquee.frame_4.png");  // Also used in Form1.OnPaint()
         //TileSprite anim_reticle = new TileSprite(reticle_four_files_ts, 15, 31, 47, 63);  // Bottom right tile in each image file
         //int reticle = anim_reticle.ID;
         //tvpc.layers[ViewPortLayers.UI_Elements].set_contents_at_XY(tvpc.center_x, tvpc.center_y, reticle);  // Center

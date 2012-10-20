@@ -1,0 +1,92 @@
+ARCHETYPE first_test_archetype, ID=1 {
+  int_field          => INT         , 42
+  string_field       => STRING      , 'abc'
+  decimal_field      => DECIMAL     , 123.456M
+  ID_field           => ID          , 0
+  list_int_field     => LIST_INT    , [1, 2, 3]
+  list_string_field  => LIST_STRING , ['abc', 'def', 'hij']
+  list_decimal_field => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+  list_ID_field      => LIST_ID     , [1, 0, 0]
+}
+
+ARCHETYPE contains_no_fields_currently, ID=123 {
+}
+
+ARCHETYPE contains_various_ints, ID=456 {
+  I1  => INT     , 0
+  I2  => INT     , 0
+  I3  => INT     , 42
+  I4  => INT     , -1
+  I5  => INT     , 1
+  LI1 => LIST_INT, []
+  LI2 => LIST_INT, []
+  LI3 => LIST_INT, [1, 2, 3]
+  LI4 => LIST_INT, [-1, -2, -3, 1, 2, 3]
+  LI5 => LIST_INT, [1, 2, 3]
+  LI6 => LIST_INT, [1, 2, 3]
+  LI7 => LIST_INT, [1, 2, 3]
+}
+
+ARCHETYPE contains_various_strings, ID=200 {
+  S1  => STRING     , ''
+  S2  => STRING     , ''
+  S3  => STRING     , 'abc'
+  S4  => STRING     , 'abc def'
+  S5  => STRING     , 'abc'
+  S6  => STRING     , 'abc def'
+  SL1 => LIST_STRING, []
+  SL2 => LIST_STRING, []
+  SL3 => LIST_STRING, ['abc', 'def', 'hij']
+  SL4 => LIST_STRING, ['abc', 'def', 'hij']
+  SL5 => LIST_STRING, ['abc', 'def', 'hij']
+  SL6 => LIST_STRING, ['abc', 'def', 'hij']
+}
+
+ARCHETYPE contains_various_decimals, ID=457 {
+  D1  => DECIMAL     , 0M
+  D2  => DECIMAL     , 0M
+  D3  => DECIMAL     , 0.0M
+  D4  => DECIMAL     , 0.1M
+  D5  => DECIMAL     , 1230.04560M
+  D6  => DECIMAL     , -1.1M
+  D7  => DECIMAL     , 1.1M
+  DL1 => LIST_DECIMAL, []
+  DL2 => LIST_DECIMAL, []
+  DL3 => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+  DL4 => LIST_DECIMAL, [-1.01M, -2.02M, -3.03M, 1.01M, 2.02M, 3.03M]
+  DL5 => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+  DL6 => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+  DL7 => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+}
+
+ARCHETYPE has_ID_42, ID=42 {
+}
+
+ARCHETYPE has_ID_12, ID=12 {
+}
+
+ARCHETYPE has_ID_34, ID=34 {
+}
+
+ARCHETYPE has_ID_56, ID=56 {
+}
+
+ARCHETYPE contains_various_IDs, ID=458 {
+  ID1  => ID     , 0
+  ID2  => ID     , 0
+  ID3  => ID     , 42
+  ID4  => ID     , 456
+  IDL1 => LIST_ID, []
+  IDL2 => LIST_ID, []
+  IDL3 => LIST_ID, [12, 34, 56]
+  IDL4 => LIST_ID, [12, 34, 56]
+  IDL5 => LIST_ID, [12, 34, 56]
+  IDL6 => LIST_ID, [12, 34, 56]
+  IDL7 => LIST_ID, [456, 200, 457]
+}
+
+ARCHETYPE contains_self_reference, ID=999 {
+  self_ID      => ID     , 999
+  self_ID_list => LIST_ID, [999, 999]
+}
+

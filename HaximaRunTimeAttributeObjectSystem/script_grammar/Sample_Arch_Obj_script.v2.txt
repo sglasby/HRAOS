@@ -1,0 +1,92 @@
+﻿# Sample script text for the v1 Haxima grammar
+# Contains ARCHETYPE and OBJ declarations, testing corners of the syntax
+# Note that it contains (non-fatal) errors in script syntax.
+// Test this style of comment...
+
+ARCHETYPE first_test_archetype {
+    int_field          => INT,     42
+    string_field       => STRING,  "abc"
+    decimal_field      => DECIMAL, 123.456M
+    ID_field           => ID,      0
+
+    list_int_field     => LIST_INT,     [1, 2, 3]
+    list_string_field  => LIST_STRING,  ["abc", "def", "hij"]
+    list_decimal_field => LIST_DECIMAL, [1.01M, 2.02M, 3.03M]
+    list_ID_field      => LIST_ID,      [1, 0, 0]  // The 1 is a self-reference, which works since Archetype is instantiated before the fields
+}
+
+OBJ (TAG => first_test_obj, ARCHETYPE => first_test_archetype) {
+    // Test fields from Archetype, WITHOUT type specified in the Obj field:
+    // (This is the most common case)
+    int_field     => 21
+    string_field  => "UVWxyz"
+    decimal_field => 999.001M
+    ID_field      => 1         // points to ARCHETYPE first_test_archetype
+
+    list_int_field     => [24, 48, 96, 192]
+    list_string_field  => ["abcd", "defg", "hijk", "lmno"]
+    list_decimal_field => [111.111M, 222.222M, 333.333M, 444.444M]
+    list_ID_field      => [1, 0, 1, 0]
+
+    // Test fields NOT in archetype, WITH type specified in the Obj field:
+    // (Uncertain how common this case will be, in use)
+    int_field_NIA     => INT, 99
+    string_field_NIA  => STRING, "yee-ha!"
+    decimal_field_NIA => DECIMAL, 11.22M
+    ID_field_NIA      => ID, 2              // points to OBJ first_test_obj
+    
+    int_list_NIA      => LIST_INT, [11, 22]
+    string_list_NIA   => LIST_STRING, ["AA", "BB"]
+    decimal_list_NIA  => LIST_DECIMAL, [11.22M, 22.33M]
+    ID_list_NIA       => LIST_ID, [2, 1, 0, 2, 1, 0]
+}
+
+OBJ (ARCHETYPE => first_test_archetype) {
+}
+
+OBJ (ARCHETYPE => first_test_archetype) {
+    // Test in-archetype fields WITH type specified in the Obj field:
+    // (Redundant, but harmless, policy settings might dictate to serialize Objs like this, so as to be explicit)
+    int_field     => INT, 43
+    string_field  => STRING, "ABC-DEF"
+    decimal_field => DECIMAL, 456.123M
+    ID_field      => ID, 3
+    
+    list_int_field     => LIST_INT,     [ 1, 2       ]
+    list_string_field  => LIST_STRING,  [ "aa", "bb" ]
+    list_decimal_field => LIST_DECIMAL, [ 1.1M, 2.2M ]
+    list_ID_field      => LIST_ID,      [ 1, 1       ]
+
+    // Test fields NOT in archetype (NIA) with no type specified:  (will default to base field types)
+    // (Not a desirable situation (as you can't get any but base storage types), but could well turn up in hand-authored script materials)
+    int_field_NIA     => 1
+    string_field_NIA  => "foo bar"
+    decimal_field_NIA => 101.101M
+    // ID_field_NIA   => 3       // This will default to INT, not ID (and how could it do otherwise, without ID mentioned in at least 1 place)
+    
+    int_list_NIA     => [ 11, 22         ]
+    string_list_NIA  => [ "cc", "dd"     ]
+    decimal_list_NIA => [ 33.33M, 44.44M ]
+    // ID_list_NIA   => [ 2, 1, 0, 2, 1, 0 ]  // This will default to INT, not ID
+}
+
+OBJ (ARCHETYPE => first_test_archetype, TAG => the_OBJ_of_errors) {
+    // These should all (produce error / be discarded), depending on policy settings (or hard-coded equilavent)
+    int_field     => STRING, "ABC"
+    string_field  => INT, 123
+    decimal_field => STRING, "DEF"
+    ID_field      => DECIMAL, 1.1M
+    
+    list_int_field     => STRING,       "abc"
+    list_string_field  => LIST_DECIMAL, [ 1.01M, 2.02M, 3.03M ]
+    list_decimal_field => LIST_STRING,  ["aaa", "bbb", "ccc" ]
+    list_ID_field      => INT,          99
+    
+    // TODO: Add similar wrong-field-type examples WITHOUT a type field...
+    
+    // TODO: Add duplicate same-field examples for both ARCHETYPE and OBJ
+}
+
+
+
+# eof

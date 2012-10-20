@@ -1,0 +1,29 @@
+public Archetype(string _tag_, int _ID_)
+public void add_field(string field_name, FieldType type , <sometype default_value> )
+
+public Obj(Archetype _arch_, string _tag_, int _ID_)
+public void add_field(string field_name, FieldType type)
+
+
+public TileSheet(int sheet_width_in_tiles, int sheet_height_in_tiles,
+                 int tile_width_px_arg,    int tile_height_px_arg,
+                 int x_offset_arg,         int y_offset_arg,
+                 int x_spacing_arg,        int y_spacing_arg,
+                 int obj_ID,
+                 params string[] file_names_arg)
+					 
+public TileSprite(TileSheet tile_sheet, int obj_ID, params int[] frame_index_args)
+
+public SimpleMapV1(int ww, int hh)
+public void AddTerrainRegion(DenseGrid RR, int xx, int yy)
+ 
+public DenseGrid(int ww, int hh, int fill)
+public DenseGrid(int ww, int hh, int[] contents)
+public int set_contents_at_XY(int xx, int yy, int new_contents)
+
+public static DenseGrid BlitFromAOntoB(DenseGrid from_A, int from_x, int from_y,
+                                       DenseGrid to_B,   int to_x,   int to_y,
+                                       int blit_width,   int blit_height)
+ public DenseGrid RotateResult(int rotation)
+ public DenseGrid Flip_WE()
+ public DenseGrid Flip_NS()

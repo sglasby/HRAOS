@@ -37,85 +37,93 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="Main\bright_marquee.frame_1.alpha.2.png">
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Sample_Arch_Obj_script.v2.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Sample_erroroneous_script.v1.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Sample_Script.OBJ_round_trip.pass_1.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Sample_script.round_trip.v1.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Sample_Script_Text.v1.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Script_BNF.v1.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Script_BNF.v2-a.txt" />
+    <Content Include="HaximaRunTimeAttributeObjectSystem\script_grammar\Script_BNF.v3.txt" />
+    <Content Include="media\tiles\bright_marquee.frame_1.alpha.2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\bright_marquee.frame_1.alpha.png">
+    <Content Include="media\tiles\bright_marquee.frame_1.alpha.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\bright_marquee.frame_1.png">
+    <Content Include="media\tiles\bright_marquee.frame_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\bright_marquee.frame_1234.png">
+    <Content Include="media\tiles\bright_marquee.frame_1234.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\bright_marquee.frame_2.png">
+    <Content Include="media\tiles\bright_marquee.frame_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\bright_marquee.frame_3.png">
+    <Content Include="media\tiles\bright_marquee.frame_3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\bright_marquee.frame_4.png">
+    <Content Include="media\tiles\bright_marquee.frame_4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\cursors\cursor_40x40_blink.stacked\cursor_40x40.frame_1.png">
+    <Content Include="media\cursors\cursor_40x40_blink.stacked\cursor_40x40.frame_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\cursors\cursor_40x40_blink.stacked\cursor_40x40.frame_2.png">
+    <Content Include="media\cursors\cursor_40x40_blink.stacked\cursor_40x40.frame_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\example_all_facings.4_frames.intra_1.png">
+    <Content Include="media\tiles\example_all_facings.4_frames.intra_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\example_wave_test.intra_1.png">
+    <Content Include="media\tiles\example_wave_test.intra_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\lava.wave_down.speed_4.frames_8.bars.png">
+    <Content Include="media\tiles\lava.wave_down.speed_4.frames_8.bars.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\lava.wave_down.speed_4.frames_8.png">
+    <Content Include="media\tiles\lava.wave_down.speed_4.frames_8.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\creatures.stacked\creatures.frame_1.png">
+    <Content Include="media\tiles\creatures.stacked\creatures.frame_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\creatures.stacked\creatures.frame_2.png">
+    <Content Include="media\tiles\creatures.stacked\creatures.frame_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\creatures.stacked\creatures.frame_3.png">
+    <Content Include="media\tiles\creatures.stacked\creatures.frame_3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\creatures.stacked\creatures.frame_4.png">
+    <Content Include="media\tiles\creatures.stacked\creatures.frame_4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_1.png">
+    <Content Include="media\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_2.png">
+    <Content Include="media\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_3.png">
+    <Content Include="media\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_4.png">
+    <Content Include="media\tiles\example_all_facings.stacked\example_all_facings.intra_1.frame_4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_1.png">
+    <Content Include="media\tiles\whirlpool.stacked\whirlpool_1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_2.png">
+    <Content Include="media\tiles\whirlpool.stacked\whirlpool_2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_3.png">
+    <Content Include="media\tiles\whirlpool.stacked\whirlpool_3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\tiles\whirlpool.stacked\whirlpool_4.png">
+    <Content Include="media\tiles\whirlpool.stacked\whirlpool_4.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\U4.B_enhanced-32x32.png">
+    <Content Include="media\tiles\U4.B_enhanced-32x32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Main\whirlpool_bright.png">
+    <Content Include="media\tiles\whirlpool_bright.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

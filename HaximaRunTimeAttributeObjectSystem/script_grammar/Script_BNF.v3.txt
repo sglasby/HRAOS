@@ -1,0 +1,201 @@
+﻿// Grammar for the script language thus far (v3, 2012/10/18)
+// Supporting 
+// ARCHETYPE and OBJ 
+// TileSheet and TileSprite
+// 
+// Note:
+// -----
+// TODO: Change ARCHETYPE to match OBJ in regards to preamble and optional commas between preamble/fields...
+//       (Will do this after OBJ is fully integrated)
+// TODO: Is it better to make comma between elements of preamble/fields mandatory, or mandatory if on same line ???
+// 
+// TODO: Fix the terminal / non-terminal distinction, get rid of the cheating with regexes...
+// 
+// The BNF dialect used here is sort of a mish-mash between original BNF and EBNF.
+// 
+// The grammar here does not show whitespace between tokens,
+// for the sake of brevity and comprehensibility.  
+// Assume an <opt_WS> before/after/between tokens.  (Hmmm...actually mandatory, in some cases...  TODO: Tighten this up)
+//     <opt_WS> := Regex(@"^\s*$")
+// 
+// The script language supports comments in the shell/Perl style 
+// of a bare '#' introducing a comment to end-of-line, as well as the '//' style.
+// This is not reflected in the grammar, but is handled in the lexer.
+//     (Comments in the grammer might be needed to support storing parsed comments for later 
+//     re-insertion in re-saved script text, but it is not clear that this will be implemented.)
+// 
+
+<hax_script> := <elements>
+
+<elements> := <element> <elements> |
+<element>  := <ARCH_decl> | <OBJ_decl> | <TileSheet_decl>
+
+//////// Script_Parser_ARCHETYPE.cs ////////
+
+<ARCH_decl> := ARCHETYPE '(' <ARCH_preamble> ')' '{' <arch_fields> '}'
+
+<ARCH_preamble>       := <ARCH_preamble_field> [',' <ARCH_preamble>]
+<ARCH_preamble_field> := <ARCH_ID> | <ARCH_tag> | <ARCH_parent>
+        <ARCH_ID>     := ID     '=>' <int_value>  // Semantic: Mandatory(1)
+        <ARCH_tag>    := TAG    '=>' <tag_name>   // Semantic: Mandatory(1)
+        <ARCH_parent> := PARENT '=>' <tag_name>   // Semantic: Optional(0,1)
+<tag_name>            := <bare_multi_word>
+
+<arch_fields> := <arch_field> <arch_fields> |
+<arch_field>  := <field_name> '=>' <ARCH_field_contents>
+
+
+////////
+
+<ARCH_field_contents> := <ARCH_scalar_contents> | <ARCH_list_contents>
+
+<ARCH_scalar_contents> := <ARCH_int_contents>      | <ARCH_string_contents>      | <ARCH_decimal_contents>      | <ARCH_ID_contents>
+<ARCH_list_contents>   := <ARCH_list_int_contents> | <ARCH_list_string_contents> | <ARCH_list_decimal_contents> | <ARCH_list_ID_contents>
+
+////////
+
+<ARCH_int_contents>     := <int_type>     [',' <int_value>    ]
+<ARCH_string_contents>  := <string_type>  [',' <string_value> ]
+<ARCH_decimal_contents> := <decimal_type> [',' <decimal_value>]
+<ARCH_ID_contents>      := <ID_type>      [',' <ID_value>     ]
+
+<ARCH_list_int_contents>     := <int_list_type>     [',' <int_list_value>    ]
+<ARCH_list_string_contents>  := <string_list_type>  [',' <string_list_value> ]
+<ARCH_list_decimal_contents> := <decimal_list_type> [',' <decimal_list_value>]
+<ARCH_list_ID_contents>      := <ID_list_type>      [',' <ID_list_value>     ]
+
+
+//////// Script_Parser_OBJ.cs ////////////////////////////////////
+
+<OBJ_decl> := OBJ '(' <OBJ_preamble> ')' '{' <OBJ_fields> '}'
+
+<OBJ_preamble>       := <OBJ_preamble_field> [','] <OBJ_preamble> |
+<OBJ_preamble_field> := <OBJ_parent_ARCH_field> | <OBJ_tag_field> | <OBJ_ID_field>
+
+<OBJ_parent_archetype_field> := ARCHETYPE '=>' <tag_name>   // Semantic: Mandatory(1)
+<OBJ_tag_field>              := TAG       '=>' <tag_name>   // Semantic: Optional(0,1)
+<OBJ_ID_field>               := ID        '=>' <int_value>  // Semantic: Optional(0,1)
+
+<OBJ_fields> := <OBJ_field> <OBJ_fields> |
+<OBJ_field>  := <field_name> '=>' <OBJ_field_contents> [',']
+
+////////
+
+<OBJ_field_contents>  := <OBJ_scalar_contents> | <OBJ_list_contents> |
+
+<OBJ_scalar_contents> := <OBJ_int_contents>      | <OBJ_string_contents>      | <OBJ_decimal_contents>      | <OBJ_ID_contents>
+<OBJ_list_contents>   := <OBJ_list_int_contents> | <OBJ_list_string_contents> | <OBJ_list_decimal_contents> | <OBJ_list_ID_contents>
+
+////////
+
+<OBJ_int_contents>     := <int_value>     | <int_type>     [ ',' <int_value>     ]
+<OBJ_string_contents>  := <string_value>  | <string_type>  [ ',' <string_value>  ]
+<OBJ_decimal_contents> := <decimal_value> | <decimal_type> [ ',' <decimal_value> ]
+<OBJ_ID_contents>      := <ID_value>      | <ID_type>      [ ',' <ID_value>      ]
+
+<OBJ_list_int_contents>     := <int_list_value>     | <int_list_type>     [ ',' <int_list_value>     ]
+<OBJ_list_string_contents>  := <string_list_value>  | <string_list_type>  [ ',' <string_list_value>  ]
+<OBJ_list_decimal_contents> := <decimal_list_value> | <decimal_list_type> [ ',' <decimal_list_value> ]
+<OBJ_list_ID_contents>      := <ID_list_value>      | <ID_list_type>      [ ',' <ID_list_value>      ]
+
+
+//////// Script_Parser_TileSheet.cs ////////
+
+<TileSheet_decl> := TileSheet '(' <TileSheet_preamble> ')' '{' <TileSheet_body> '}'
+
+<TileSheet_preamble>       := <TileSheet_preamble_field> [ ',' <TileSheet_preamble_field> ]*
+<TileSheet_preamble_field> := <TileSheet_tag_field> |  // Semantic: Mandatory(1)
+                              <TileSheet_ID_field>  |  // Semantic: Optional(0,1)
+                              <grid_extent>         |  // Semantic: Mandatory(1)
+                              <tile_size_px>        |  // Semantic: Mandatory(1)
+                              <sheet_offset_px>     |  // Semantic: Optional(0,1)
+                              <sheet_spacing_px>    |  // Semantic: Optional(0,1)
+                              <image_file_names>       // Semantic: Mandatory(1)
+
+<TileSheet_tag_field>      := TAG '=>' <tag_name>
+<TileSheet_ID_field>       := ID  '=>' <int_value>
+
+<grid_extent>      := '[' <width_in_tiles> ',' <height_in_tiles> ']'
+<tile_size_px>     := '[' <tile_width_px>  ',' <tile_height_px>  ']'
+<sheet_offset_px>  := '[' <x_offset>       ',' <y_offset>        ']'
+<sheet_spacing_px> := '[' <x_spacing>      ',' <y_spacing>       ']'
+<image_file_names> := <file_path>+
+
+<TileSheet_body> := <TileSprite_decl>*
+    // Since TileSprites refer to a TileSheet, it is expedient 
+	// to declare them within the {} body of the TileSheet declaration.
+	// I know of no needful use case to allow their declaration elsewhere.
+
+
+
+//////// Script_Parser_TileSprite.cs ////////
+
+<TileSprite_decl> := SPR '(' <TileSprite_preamble> ')' ';'
+
+<TileSprite_preamble> := <TileSprite_preamble_field> [ ',' <TileSprite_preamble_field> ]*
+<TileSprite_preamble_field> := 
+    <ID>                      |  // Semantic: Optional(0,1)
+	<TAG>                     |  // Semantic: Mandatory(1)
+	<SPR_frames_specification>   // Semantic: Mandatory(1)
+	
+<SPR_frames_specification> := <SPR_spec_explicit> | <SPR_spec_stride>
+<SPR_spec_explicit>        := [<SPR_num_frames>]? <SPR_sequence>
+<SPR_spec_stride>          :=  <SPR_num_frames>   <SPR_base> [<SPR_stride>]?
+
+<SPR_num_frames> := num_frames '=' <int_value>
+<SPR_sequence>   :=     frames '=' '(' <frame> [ ',' <frame> ]* ')'  // Semantic: num_frames matches count of <frame>
+<SPR_base>       :=       base '=' <frame>
+<SPR_stride>     :=     stride '=' <int_value>  // Semantic: stride value must be positive
+
+<frame>           := <frame_by_index> | <frame_by_XY> | <frame_by_XYZ>
+<frame_by_index>  := <int_value>
+<frame_by_XY>     := '[' <int_value> ',' <int_value> ']'
+<frame_by_XYZ>    := '[' <int_value> ',' <int_value> ',' <int_value> ']'
+    // Semantic: index, XY, and XYZ values must refer to a valid coordinate within the TileSheet grid
+
+
+//////// Script_Parser_Terminals.cs //////// (These may stow values into a parser struct, and may be called by various parse branches)
+
+<int_type>     := 'INT'
+<string_type>  := 'STRING'
+<decimal_type> := 'DECIMAL'
+<ID_type>      := 'ID'
+
+<int_list_type>     := 'LIST_INT'
+<string_list_type>  := 'LIST_STRING'
+<decimal_list_type> := 'LIST_DECIMAL'
+<ID_list_type>      := 'LIST_ID'
+
+<int_value>     := Regex(@"^[+-]?\d+$")           // Possibly add support for hex notation?  Regex(@"^0[xX][0-9a-fA-F]+$")
+<string_value>  := Regex(@"^\"[^"]*\"$")
+<decimal_value> := Regex(@"^[+-]?(\d*\.)?\d+M$")  // Possibly add support for scientific notation?  (low priority)
+<ID_value>      := <int_value> | <valid_tag>      // Semantic: If tag, resolves tag to ID.  ID must be zero or a valid ID
+
+<valid_tag>       := <bare_multi_word>            // Semantic: Checks for validity of tag
+<field_name>      := <bare_multi_word>
+
+<bare_multi_word> := Regex(@"^([a-zA-Z]\w*)([-](\w+))*$")
+    // TODO: perhaps valid_tag --> existing_tag, and also define new_tag := bare_multi_word ???
+
+
+//////// And Not-Quite Terminals //////// (These may also stow values into a parser struct, and be called by various parse branches)
+
+<int_list_value>     := '[' <zero_or_more_comma_separated_int_values>     ']'
+<string_list_value>  := '[' <zero_or_more_comma_separated_string_values>  ']'
+<decimal_list_value> := '[' <zero_or_more_comma_separated_decimal_values> ']'
+<ID_list_value>      := '[' <zero_or_more_comma_separated_ID_values>      ']'
+
+<zero_or_more_comma_separated_int_values>     := <int_value>     ',' <zero_or_more_comma_separated_int_values>     | <int_value>     ',' | <int_value>     |
+<zero_or_more_comma_separated_string_values>  := <string_value>  ',' <zero_or_more_comma_separated_string_values>  | <string_value>  ',' | <string_value>  |
+<zero_or_more_comma_separated_decimal_values> := <decimal_value> ',' <zero_or_more_comma_separated_decimal_values> | <decimal_value> ',' | <decimal_value> |
+<zero_or_more_comma_separated_ID_values>      := <ID_value>      ',' <zero_or_more_comma_separated_ID_values>      | <ID_value>      ',' | <ID_value>      |
+
+<file_path>        := '"' ( <dir_name> '/' )* <file_name> '"'
+<dir_name>         := Regex(@"[a-zA-Z-_\.]+")
+<file_name>        := <file_basename> '.' <file_ext>
+<file_basename>    := Regex(@"[a-zA-Z-_]+(\.[a-zA-Z-_]+)*")
+<file_ext>         := Regex(@"\w+")
+
+
+
+// eof

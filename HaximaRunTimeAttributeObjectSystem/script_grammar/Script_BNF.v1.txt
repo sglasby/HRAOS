@@ -1,0 +1,111 @@
+// Grammar for the script language thus far (v1.1, 2010/05/02)
+// Only supporting ARCHETYPE declarations (with fields, tag + ID, and the basic types) for now.
+// 
+// Note:
+// -----
+// TODO: Fix the terminal / non-terminal distinction, get rid of the cheating with regexes...
+// 
+// The BNF dialect used here is sort of a mish-mash between original BNF and EBNF.
+// 
+// The grammar here does not show whitespace between tokens,
+// for the sake of brevity and comprehensibility.  
+// Assume an <opt_WS> before/after/between tokens.  (Hmmm...actually mandatory, in some cases...  TODO: Tighten this up)
+// 
+// The script language supports comments in the shell/Perl style 
+// of a bare '#' introducing a comment to end-of-line, as well as the '//' style.
+// This is not reflected in the grammar, but is handled in the lexer.
+//     (Comments in the grammer might be needed to support storing parsed comments for later 
+//     re-insertion in re-saved script text, but it is not clear that this will be implemented.)
+// 
+
+<hax_script> := <elements>
+
+<elements> := <element> <elements> |
+<element>  := <archetype_decl> | <obj_decl>
+
+    // TODO: Change ARCHETYPE to match OBJ in regards to preamble and optional commas between preamble/fields...
+<archetype_decl> := ARCHETYPE <tag_name> [<comma> <ID> '=' <int_value>] '{' <arch_fields> '}'
+<tag_name>       := <bare_multi_word>
+
+<arch_fields> := <arch_field> <arch_fields> |
+<arch_field>  := <field_name> '=>' <archetype_field_contents>
+
+<field_name>  := <bare_multi_word>    // Note: No internal whitespace, so no quotes needed
+
+<archetype_field_contents> := <scalar_contents> | <list_contents>
+
+///////////////////////////////////////
+
+    // TODO: Is it better to make comma between elements of preamble/fields mandatory, or mandatory if on same line ???
+<obj_decl> := OBJ '(' <obj_preamble> ')' '{' <obj_fields> '}'
+
+<obj_preamble>       := <obj_preamble_field> [<comma>] <obj_preamble> |
+<obj_preamble_field> := <obj_parent_archetype_field> | <obj_tag_field> | <obj_ID_field>
+
+<obj_parent_archetype_field> := ARCHETYPE '=>' <tag_name>   // Semantic: Mandatory(1)
+<obj_tag_field>              := TAG       '=>' <tag_name>   // Semantic: Optional(0,1)
+<obj_ID_field>               := ID        '=>' <int_value>  // Semantic: Optional(0,1)
+
+<obj_fields> := <obj_field> <obj_fields> |
+<obj_field>  := <field_name> '=>' <obj_field_contents> [<comma>]
+
+<obj_field_contents>       := <obj_fieldcontents_with_type_> | <obj_field_contents_without_type>
+ 
+<obj_field_contents_with_type>    := <scalar_contents> | <list_contents>    // Same as per archetype fields
+<obj_field_contents_without_type> := <int_value>       | <string_value>      | <decimal_value>      | <ID_value>      |
+                                     <int_list_value>  | <string_list_value> | <decimal_list_value> | <ID_list_value>
+ 
+    // When parsing obj_field_with_type_contents,    a type is specified just as for archetype fields (error if it conflicts with the archetype-specified type)
+    // When parsing obj_field_without_type_contents, the archetype is consulted to determine the type, so the type can be omitted
+
+////////////////////////////////////////////
+
+<scalar_contents> := <int_contents>      | <string_contents>      | <decimal_contents>      | <ID_contents>
+<list_contents>   := <list_int_contents> | <list_string_contents> | <list_decimal_contents> | <list_ID_contents>
+
+<int_contents>     := <int_type>     [<comma> <int_value>    ]
+<string_contents>  := <string_type>  [<comma> <string_value> ]
+<decimal_contents> := <decimal_type> [<comma> <decimal_value>]
+<ID_contents>      := <ID_type>      [<comma> <ID_value>     ]
+
+<list_int_contents>     := <int_list_type>     [<comma> <int_list_value>    ]
+<list_string_contents>  := <string_list_type>  [<comma> <string_list_value> ]
+<list_decimal_contents> := <decimal_list_type> [<comma> <decimal_list_value>]
+<list_ID_contents>      := <ID_list_type>      [<comma> <ID_list_value>     ]
+
+<int_type>     := INT
+<string_type>  := STRING
+<decimal_type> := DECIMAL
+<ID_type>      := ID
+
+<int_list_type>     := LIST_INT
+<string_list_type>  := LIST_STRING
+<decimal_list_type> := LIST_DECIMAL
+<ID_list_type>      := LIST_ID
+
+<comma> := ','
+
+<int_value>     := Regex(@"^[+-]?\d+$")           // Possibly add support for hex notation?  Regex(@"^0[xX][0-9a-fA-F]+$")
+<string_value>  := Regex(@"^\"[^"]*\"$")
+<decimal_value> := Regex(@"^[+-]?(\d*\.)?\d+M$")  // Possibly add support for scientific notation?  (low priority)
+<ID_value>      := <int_value> | <valid_tag>
+
+<valid_tag> := <bare_multi_word>
+
+<int_list_value>     := '[' <zero_or_more_comma_separated_int_values>     ']'
+<string_list_value>  := '[' <zero_or_more_comma_separated_string_values>  ']'
+<decimal_list_value> := '[' <zero_or_more_comma_separated_decimal_values> ']'
+<ID_list_value>      := '[' <zero_or_more_comma_separated_ID_values>      ']'
+
+<zero_or_more_comma_separated_int_values>     := <int_value>     ',' <zero_or_more_comma_separated_int_values>     | <int_value>     ',' | <int_value>     |
+<zero_or_more_comma_separated_string_values>  := <string_value>  ',' <zero_or_more_comma_separated_string_values>  | <string_value>  ',' | <string_value>  |
+<zero_or_more_comma_separated_decimal_values> := <decimal_value> ',' <zero_or_more_comma_separated_decimal_values> | <decimal_value> ',' | <decimal_value> |
+<zero_or_more_comma_separated_ID_values>      := <ID_value>      ',' <zero_or_more_comma_separated_ID_values>      | <ID_value>      ',' | <ID_value>      |
+
+<bare_multi_word>    := Regex(@"^([a-zA-Z]\w*)([-](\w+))*$")
+
+<opt_WS> := Regex(@"^\s*$")
+
+
+
+// eof

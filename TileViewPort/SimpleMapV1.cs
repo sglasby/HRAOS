@@ -67,19 +67,16 @@ public interface IGridIterable
 public class SimpleMapV1 {
     public int width       { get; set; }
     public int height      { get; set; }
-    public TileSheet sheet { get; private set; } // This belongs elsewhere, after implementation bootstrapping...Hmmm, may not even be needed now
     public IGridIterable[] layers;
     // TODO: Add support for "default object/terrain", likely on a per-layer basis...
 
-    public SimpleMapV1(int ww, int hh, TileSheet ts)
+    public SimpleMapV1(int ww, int hh)
     {
         if ((ww < 1) || (ww > GridUtility2D.max_width )) { throw new ArgumentException("invalid width"); }
         if ((hh < 1) || (hh > GridUtility2D.max_height)) { throw new ArgumentException("invalid height"); }
-        if (ts == null) { throw new ArgumentException("invalid tilesheet"); }
 
         width  = ww;
         height = hh;
-        sheet  = ts;
         layers = new IGridIterable[MapLayers.COUNT];
         layers[MapLayers.Terrain] = new MapCompositedLayer(width, height);
         layers[MapLayers.Beings]  = new MapSparseGridLayer(width, height, null);
